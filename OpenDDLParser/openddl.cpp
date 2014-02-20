@@ -444,7 +444,7 @@ int64_t openddl::decode_int64(const std::string & token)
 	}
 	catch (...)
 	{
-		throw exception("'" + token + "' is not a valid 32-bit integer literal");
+		throw exception("'" + token + "' is not a valid 64-bit integer literal");
 	}
 }
 //TODO: Implement this
