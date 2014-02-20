@@ -204,9 +204,28 @@ TEST_CASE("Decode int64", "[decode]") {
 	CHECK_THROWS(openddl::decode_int64("21b"));
 }
 TEST_CASE("Decode float", "[decode]") {
-
+	CHECK(openddl::decode_float("0x0") == 0);
+	CHECK(openddl::decode_float("0x3f800000") == 1.0f); 
+	CHECK(openddl::decode_float("-0x3f800000") == -1.0f);
+	CHECK(openddl::decode_float("1.0") == 1.0f);
+	CHECK(openddl::decode_float("0.5") == 0.5f);
+	CHECK(openddl::decode_float(".5") == 0.5f);
+	CHECK(openddl::decode_float("1e2") == 100.0f);
+	CHECK(openddl::decode_float("1E2") == 100.0f);
+	CHECK(openddl::decode_float("1E+2") == 100.0f);
+	CHECK(openddl::decode_float("1E-1") == 0.1f);
 }
 TEST_CASE("Decode double", "[decode]") {
+	CHECK(openddl::decode_double ("0x0") == 0);
+	CHECK(openddl::decode_double("0x3ff0000000000000") == 1.0);
+	CHECK(openddl::decode_double("-0x3ff0000000000000") == -1.0);
+	CHECK(openddl::decode_double("1.0") == 1.0);
+	CHECK(openddl::decode_double("0.5") == 0.5);
+	CHECK(openddl::decode_double(".5") == 0.5);
+	CHECK(openddl::decode_double("1e2") == 100.0);
+	CHECK(openddl::decode_double("1E2") == 100.0);
+	CHECK(openddl::decode_double("1E+2") == 100.0);
+	CHECK(openddl::decode_double("1E-1") == 0.1);
 
 }
 TEST_CASE("Parse String", "[parse]") {

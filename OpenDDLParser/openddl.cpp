@@ -450,32 +450,106 @@ int64_t openddl::decode_int64(const std::string & token)
 //TODO: Implement this
 float openddl::decode_float(const std::string & token)
 {
-	bool negate = false;
-	int index = 0;
-	switch (token[0]){
-	case '+':
-		index += 1; break;
-	case '-':
-		index += 1; negate = true; break;
-	}
-	if (token[index] == '0')
+	try
 	{
-		switch (token[index + 1])
-		{
-		case 'x':
-		case 'X':
-			break;
-		case 'b':
-		case 'B':
-			break;
+		bool negate = false;
+		int index = 0;
+		switch (token[0]){
+		case '+':
+			index += 1; break;
+		case '-':
+			index += 1; negate = true; break;
 		}
+		if (token[index] == '0')
+		{
+			uint32_t value = 0;
+			size_t position = 0;
+			switch (token[index + 1])
+			{
+			case 'x':
+			case 'X':
+				//Treat as hex literal
+				index += 2;
+				value = std::stoul(token.substr(index), &position, 16);
+				break;
+			case 'b':
+			case 'B':
+				//Treat as binary literal
+				index += 2;
+				value = std::stoul(token.substr(index), &position, 2);
+				break;
+			}
+			if (position)
+			{
+				if ((position + index) < token.length())
+					throw exception("Not all characters were consumed");
+				return negate ? -*reinterpret_cast<float*>(&value) : *reinterpret_cast<float*>(&value);
+			}
+		}
+		//Treat as stringified float literal
+		size_t position = 0;
+		float value = std::stof(token.substr(index), &position);
+		if (position < token.length())
+			throw exception("Not all characters were consumed");
+		return negate ? -value : value;
 	}
-	return 0;
+	catch (...)
+	{
+		throw exception("'" + token + "' is not a valid float literal");
+	}
+
 }
 //TODO: Implement this
 double openddl::decode_double(const std::string & token)
 {
-	return 0;
+	try
+	{
+		bool negate = false;
+		int index = 0;
+		switch (token[0]){
+		case '+':
+			index += 1; break;
+		case '-':
+			index += 1; negate = true; break;
+		}
+		if (token[index] == '0')
+		{
+			uint64_t value = 0;
+			size_t position = 0;
+			switch (token[index + 1])
+			{
+			case 'x':
+			case 'X':
+				//Treat as hex literal
+				index += 2;
+				value = std::stoull(token.substr(index), &position, 16);
+				break;
+			case 'b':
+			case 'B':
+				//Treat as binary literal
+				index += 2;
+				value = std::stoull(token.substr(index), &position, 2);
+				break;
+			}
+			if (position)
+			{
+				if ((position + index) < token.length())
+					throw exception("Not all characters were consumed");
+				return negate ? -*reinterpret_cast<double*>(&value) : *reinterpret_cast<double*>(&value);
+			}
+		}
+		//Treat as stringified double literal
+		size_t position = 0;
+		double value = std::stod(token.substr(index), &position);
+		if (position < token.length())
+			throw exception("Not all characters were consumed");
+		return negate ? -value : value;
+	}
+	catch (...)
+	{
+		throw exception("'" + token + "' is not a valid double literal");
+	}
+
 }
 //TODO: Implement this
 std::string openddl::parse_string(const std::string & token)
