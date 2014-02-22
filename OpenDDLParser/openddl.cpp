@@ -9,177 +9,301 @@
 //================================================================================================================
 // Internal common functionality for decoding literals.
 //================================================================================================================
-//Internal function used to consume individual/aggregate characters out of a token
-char consume_character(const std::string & token, unsigned int & index, const unsigned int length)
+namespace detail
 {
-	char value = 0;
-	if (token[index] == '\\'){
-		if ((length - index) >= 2)
-		{
-			switch (token[index + 1])
+	//Internal function used to consume individual/aggregate characters out of a token
+	char consume_character(const std::string & token, unsigned int & index, const unsigned int length)
+	{
+		char value = 0;
+		if (token[index] == '\\'){
+			if ((length - index) >= 2)
 			{
-			case '"':
-				value = '"'; index += 2; break;
-			case '\'':
-				value = '\''; index += 2; break;
-			case '?':
-				value = '?'; index += 2; break;
-			case '\\':
-				value = '\\'; index += 2; break;
-			case 'a':
-				value = '\a'; index += 2; break;
-			case 'b':
-				value = '\b'; index += 2; break;
-			case 'f':
-				value = '\f'; index += 2; break;
-			case 'n':
-				value = '\n'; index += 2; break;
-			case 't':
-				value = '\t'; index += 2; break;
-			case 'v':
-				value = '\v'; index += 2; break;
-			case 'x':
-				if ((length - index) >= 4)
+				switch (token[index + 1])
 				{
-					size_t position = 0;
-					value = std::stoi(token.substr(index + 2, 2), &position, 16);
-					if (position != 2)
-						throw openddl::exception("Invalid hex character literal");
-					index += 4;
+				case '"':
+					value = '"'; index += 2; break;
+				case '\'':
+					value = '\''; index += 2; break;
+				case '?':
+					value = '?'; index += 2; break;
+				case '\\':
+					value = '\\'; index += 2; break;
+				case 'a':
+					value = '\a'; index += 2; break;
+				case 'b':
+					value = '\b'; index += 2; break;
+				case 'f':
+					value = '\f'; index += 2; break;
+				case 'n':
+					value = '\n'; index += 2; break;
+				case 't':
+					value = '\t'; index += 2; break;
+				case 'v':
+					value = '\v'; index += 2; break;
+				case 'x':
+					if ((length - index) >= 4)
+					{
+						size_t position = 0;
+						value = std::stoi(token.substr(index + 2, 2), &position, 16);
+						if (position != 2)
+							throw openddl::exception("Invalid hex character literal");
+						index += 4;
+					}
+					else
+						throw openddl::exception("Insufficient characters to consume");
 				}
-				else
-					throw openddl::exception("Insufficient characters to consume");
 			}
 		}
-	}
-	else if ((length - index) >= 1)
-	{
-		const char character = token[index];
-		if ((character >= 0x20 && character < '\'') || (character > '\'' && character < 0x7F))
+		else if ((length - index) >= 1)
 		{
-			index += 1;
-			return character;
+			const char character = token[index];
+			if ((character >= 0x20 && character < '\'') || (character > '\'' && character < 0x7F))
+			{
+				index += 1;
+				return character;
+			}
+			else
+				throw openddl::exception("Not a valid character literal");
 		}
+		return value;
+	}
+	//Internal function used to consume characters out of a string and decode them into their utf32 form
+	//Returns decoded character and sets length to number of characters within literal.
+	char32_t decode_utf8(const std::string & token, const unsigned int index, unsigned int & length)
+	{
+		char32_t value = 0;
+		// 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+		if ((token[index] & 0xFC) == 0xFC)
+		{
+			value = ((token[index] & 0x01) << 30) | ((token[index + 1] & 0x3F) << 24)
+				| ((token[index + 2] & 0x3F) << 18) | ((token[index + 3]
+				& 0x3F) << 12)
+				| ((token[index + 4] & 0x3F) << 6) | (token[index + 5] & 0x3F);
+			length = 6;
+		}
+		// 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+		else if ((token[index] & 0xF8) == 0xF8)
+		{
+			value = ((token[index] & 0x03) << 24) | ((token[index + 1]
+				& 0x3F) << 18)
+				| ((token[index + 2] & 0x3F) << 12) | ((token[index + 3]
+				& 0x3F) << 6)
+				| (token[index + 4] & 0x3F);
+			length = 5;
+		}
+		// 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+		else if ((token[index] & 0xF0) == 0xF0)
+		{
+			value = ((token[index] & 0x07) << 18) | ((token[index + 1]
+				& 0x3F) << 12)
+				| ((token[index + 2] & 0x3F) << 6) | (token[index + 3] & 0x3F);
+			length = 4;
+		}
+		// 1110xxxx 10xxxxxx 10xxxxxx
+		else if ((token[index] & 0xE0) == 0xE0)
+		{
+			value = ((token[index] & 0x0F) << 12) | ((token[index + 1] & 0x3F) << 6)
+				| (token[index + 2] & 0x3F);
+			length = 3;
+		}
+		// 110xxxxx 10xxxxxx
+		else if ((token[index] & 0xC0) == 0xC0)
+		{
+			value = ((token[index] & 0x1F) << 6) | (token[index + 1] & 0x3F);
+			length = 2;
+		}
+		// 0xxxxxxx
+		else if (token[index] < 0x80)
+		{
+			value = token[index];
+			length = 1;
+		}
+		return value;
+	}
+	//Encodes utf32 encoded character as a sequence of utf8 encoded bytes (appending to string)
+	//Handles characters in the range of 0x00 to 0x10FFFF
+	void encode_utf8(std::string & out, const char32_t token)
+	{
+		if (token < 0x80)
+		{
+			out.push_back(token);
+		}
+		else if (token < 0x800)
+		{
+			out.push_back(0xC0 | (token >> 6) & 0x3F);
+			out.push_back(0x80 | token & 0x3F);
+		}
+		else if (token < 0x10000)
+		{
+			out.push_back(0xE0 | (token >> 12) & 0x3F);
+			out.push_back(0x80 | (token >> 6) & 0x3F);
+			out.push_back(0x80 | token & 0x3F);
+		}
+		else if (token < 0x200000)
+		{
+			out.push_back(0xF0 | (token >> 18) & 0x3F);
+			out.push_back(0x80 | (token >> 12) & 0x3F);
+			out.push_back(0x80 | (token >> 6) & 0x3F);
+			out.push_back(0x80 | token & 0x3F);
+		}
+		else throw openddl::exception("Unicode overflow");
+
+	}
+	struct literal_encoding
+	{
+		bool negate;
+		bool character;
+		int number_base;
+		int offset;
+	};
+	//Decode integer specific encoding details from token string
+	literal_encoding decode_literal(const std::string & token)
+	{
+		literal_encoding lit;
+		const int length = token.length();
+
+		lit.number_base = 10;
+		lit.offset = 0;
+		lit.negate = false;
+		lit.character = false;
+
+		if (length > 1)
+		{
+			const char first_character = token[0];
+			if (first_character == '-')
+			{
+				lit.negate = true;
+				lit.offset += 1;
+			}
+			else if (first_character == '+')
+				lit.offset += 1;
+
+			char encoding_char = token[lit.offset];
+
+			if (encoding_char == '\'')
+				lit.character = true;
+			else if (encoding_char == '0')
+			{
+				encoding_char = token[lit.offset + 1];
+				lit.offset += 2;
+				if (encoding_char == 'b' || encoding_char == 'B')
+					lit.number_base = 2;
+				else if (encoding_char == 'x' || encoding_char == 'X')
+					lit.number_base = 16;
+			}
+		}
+		return lit;
+	}
+
+	uint64_t decode_unsigned_integer(const std::string & token)
+	{
+		const int length = token.length();
+		auto lit = decode_literal(token);
+		uint64_t value = 0;
+		if (lit.negate)
+			throw std::underflow_error("Unsigned literal may not be negative");
+		if (lit.character)
+			value = openddl::parse_character_literal(token, lit.offset);
 		else
-			throw openddl::exception("Not a valid character literal");
-	}
-	return value;
-}
-
-struct literal_encoding
-{
-	bool negate;
-	bool character;
-	int number_base;
-	int offset;
-};
-//Decode integer specific encoding details from token string
-literal_encoding decode_literal(const std::string & token)
-{
-	literal_encoding lit;
-	const int length = token.length();
-
-	lit.number_base = 10;
-	lit.offset = 0;
-	lit.negate = false;
-	lit.character = false;
-
-	if (length > 1)
-	{
-		const char first_character = token[0];
-		if (first_character == '-')
 		{
-			lit.negate = true;
-			lit.offset += 1;
+			size_t position = 0;
+			value = std::stoull(token.substr(lit.offset, length - lit.offset), &position, lit.number_base);
+			if (position != (length - lit.offset))
+				throw std::length_error("Invalid characters part of token");
 		}
-		else if (first_character == '+')
-			lit.offset += 1;
+		return value;
+	}
 
-		char encoding_char = token[lit.offset];
-
-		if (encoding_char == '\'')
-			lit.character = true;
-		else if (encoding_char == '0')
+	int64_t decode_integer(const std::string & token)
+	{
+		const int length = token.length();
+		auto lit = decode_literal(token);
+		int64_t value = 0;
+		if (lit.character)
+			value = openddl::parse_character_literal(token, lit.offset);
+		else
 		{
-			encoding_char = token[lit.offset + 1];
-			lit.offset += 2;
-			if (encoding_char == 'b' || encoding_char == 'B')
-				lit.number_base = 2;
-			else if (encoding_char == 'x' || encoding_char == 'X')
-				lit.number_base = 16;
+			size_t position = 0;
+			value = std::stoll(token.substr(lit.offset, length - lit.offset), &position, lit.number_base);
+			if (position != (length - lit.offset))
+				throw std::length_error("Invalid characters part of token");
+		}
+		if (lit.negate)
+			value *= -1;
+		return value;
+	}
+
+	int read_escape_character(std::string & out, const std::string & token, const unsigned int index)
+	{
+		switch (token[index])
+		{
+		case '"':
+			out.append("\"");
+			return 1;
+		case '\'':
+			out.append("\'");
+			return 1;
+		case '?':
+			out.append("?");
+			return 1;
+		case '\\':
+			out.append("\\");
+			return 1;
+		case 'a':
+			out.append("\a");
+			return 1;
+		case 'b':
+			out.append("\b");
+			return 1;
+		case 'f':
+			out.append("\f");
+			return 1;
+		case 'n':
+			out.append("\n");
+			return 1;
+		case 'r':
+			out.append("\r");
+			return 1;
+		case 't':
+			out.append("\t");
+			return 1;
+		case 'v':
+			out.append("\v");
+			return 1;
+		case 'u':
+		{
+			if (index + 4 > token.length())
+				throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
+			size_t position = 0;
+			const char32_t code_point = std::stoi(token.substr(index + 1, 4), &position, 16);
+			if (position != 4)
+				throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
+			if (code_point < 0x0001 || code_point > 0x10FFFF)
+				throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
+			encode_utf8(out, code_point);
+			return 5;
+		}
+		case 'U':
+		{
+			if (index + 6 > token.length())
+				throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
+			size_t position = 0;
+			const char32_t code_point = std::stoi(token.substr(index + 1, 6), &position, 16);
+			if (position != 6)
+				throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
+			if (code_point < 0x0001 || code_point > 0x10FFFF)
+				throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
+			encode_utf8(out, code_point);
+			return 7;
+		}
+		default:
+			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
 		}
 	}
-	return lit;
 }
-
-uint64_t decode_unsigned_integer(const std::string & token)
-{
-	const int length = token.length();
-	auto lit = decode_literal(token);
-	uint64_t value = 0;
-	if (lit.negate)
-		throw std::underflow_error("Unsigned literal may not be negative");
-	if (lit.character)
-		value = openddl::parse_character_literal(token, lit.offset);
-	else
-	{
-		size_t position = 0;
-		value = std::stoull(token.substr(lit.offset, length - lit.offset), &position, lit.number_base);
-		if (position != (length - lit.offset))
-			throw std::length_error("Invalid characters part of token");
-	}
-	return value;
-}
-
-int64_t decode_integer(const std::string & token)
-{
-	const int length = token.length();
-	auto lit = decode_literal(token);
-	int64_t value = 0;
-	if (lit.character)
-		value = openddl::parse_character_literal(token, lit.offset);
-	else
-	{
-		size_t position = 0;
-		value = std::stoll(token.substr(lit.offset, length - lit.offset), &position, lit.number_base);
-		if (position != (length - lit.offset))
-			throw std::length_error("Invalid characters part of token");
-	}
-	if (lit.negate)
-		value *= -1;
-	return value;
-}
-
 //================================================================================================================
 
-std::string & openddl::format_utf8(std::string & out, char32_t token)
-{
-	if (token < 0x80)
-	{
-		out.push_back(token);
-	}
-	else if (token < 0x800)
-	{
-		out.push_back(0xC0 | (token >> 6) & 0x3F);
-		out.push_back(0x80 | token & 0x3F);
-	}
-	else if (token < 0x10000)
-	{
-		out.push_back(0xE0 | (token >> 12) & 0x3F);
-		out.push_back(0x80 | (token >> 6) & 0x3F);
-		out.push_back(0x80 | token & 0x3F);
-	}
-	else if (token < 0x200000)
-	{
-		out.push_back(0xF0 | (token >> 18) & 0x3F);
-		out.push_back(0x80 | (token >> 12) & 0x3F);
-		out.push_back(0x80 | (token >> 6) & 0x3F);
-		out.push_back(0x80 | token & 0x3F);
-	}
-	else throw openddl::exception("Unicode overflow");
-	return out;
 
-}
 bool openddl::is_identifier(const std::string & token, const unsigned int index)
 {
 	const unsigned int length = token.length();
@@ -208,7 +332,7 @@ uint64_t openddl::parse_character_literal(const std::string & token, const unsig
 		//Iterate through string consuming (symbolic) characters up to a maximum of 8
 		for (unsigned int i = 0; i < 8; i++)
 		{
-			value += consume_character(token, position, length - 1);
+			value += detail::consume_character(token, position, length - 1);
 			if (position >= length - 1)
 				break;
 			value = value << 8;
@@ -221,73 +345,7 @@ uint64_t openddl::parse_character_literal(const std::string & token, const unsig
 	throw exception("Not a valid character literal");
 }
 
-int openddl::read_escape_character(std::string & out, const std::string & token, const unsigned int index)
-{
-	switch (token[index])
-	{
-	case '"':
-		out.append("\"");
-		return 1;
-	case '\'':
-		out.append("\'");
-		return 1;
-	case '?':
-		out.append("?");
-		return 1;
-	case '\\':
-		out.append("\\");
-		return 1;
-	case 'a':
-		out.append("\a");
-		return 1;
-	case 'b':
-		out.append("\b");
-		return 1;
-	case 'f':
-		out.append("\f");
-		return 1;
-	case 'n':
-		out.append("\n");
-		return 1;
-	case 'r':
-		out.append("\r");
-		return 1;
-	case 't':
-		out.append("\t");
-		return 1;
-	case 'v':
-		out.append("\v");
-		return 1;
-	case 'u':
-	{
-		if (index + 4 > token.length())
-			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
-		size_t position = 0;
-		const char32_t code_point = std::stoi(token.substr(index + 1, 4), &position, 16);
-		if (position != 4)
-			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
-		if (code_point < 0x0001 || code_point > 0x1FFFF)
-			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
-		format_utf8(out, code_point);
-		return 5;
-	}
-	case 'U':
-	{
-		if (index + 6 > token.length())
-			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
-		size_t position = 0;
-		const char32_t code_point = std::stoi(token.substr(index + 1, 6), &position, 16);
-		if (position != 6)
-			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
-		if (code_point < 0x0001 || code_point > 0x1FFFF)
-			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
-		format_utf8(out, code_point);
-		return 7;
-	}
-	default:
-		throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
-	}
-}
+
 bool openddl::is_name(const std::string & token,const unsigned int index)
 {
 	const unsigned int length = token.length();
@@ -335,7 +393,7 @@ uint8_t openddl::decode_unsigned_int8(const std::string & token)
 {
 	try
 	{
-		uint64_t value = decode_unsigned_integer(token);
+		uint64_t value = detail::decode_unsigned_integer(token);
 		if (value > UINT8_MAX)
 			throw std::overflow_error("Literal overflowed");
 		return (uint8_t)value;
@@ -350,7 +408,7 @@ uint16_t openddl::decode_unsigned_int16(const std::string & token)
 {
 	try
 	{
-		uint64_t value = decode_unsigned_integer(token);
+		uint64_t value = detail::decode_unsigned_integer(token);
 		if (value > UINT16_MAX)
 			throw std::overflow_error("Literal overflowed");
 		return (uint16_t)value;
@@ -365,7 +423,7 @@ uint32_t openddl::decode_unsigned_int32(const std::string & token)
 {
 	try
 	{
-		uint64_t value = decode_unsigned_integer(token);
+		uint64_t value = detail::decode_unsigned_integer(token);
 		if (value > UINT32_MAX)
 			throw std::overflow_error("Literal overflowed");
 		return (uint32_t)value;
@@ -380,7 +438,7 @@ uint64_t openddl::decode_unsigned_int64(const std::string & token)
 {
 	try
 	{
-		uint64_t value = decode_unsigned_integer(token);
+		uint64_t value = detail::decode_unsigned_integer(token);
 		if (value > UINT64_MAX)
 			throw std::overflow_error("Literal overflowed");
 		return value;
@@ -395,7 +453,7 @@ int8_t openddl::decode_int8(const std::string & token)
 {
 	try
 	{
-		int64_t value = decode_integer(token);
+		int64_t value = detail::decode_integer(token);
 		if (value < INT8_MIN || value > INT8_MAX)
 			throw std::overflow_error("Literal overflowed");
 		return (int8_t)value;
@@ -410,7 +468,7 @@ int16_t openddl::decode_int16(const std::string & token)
 {
 	try
 	{
-		int64_t value = decode_integer(token);
+		int64_t value = detail::decode_integer(token);
 		if (value < INT16_MIN || value > INT16_MAX)
 			throw std::overflow_error("Literal overflowed");
 		return (int16_t)value;
@@ -425,7 +483,7 @@ int32_t openddl::decode_int32(const std::string & token)
 {
 	try
 	{
-		int64_t value = decode_integer(token);
+		int64_t value = detail::decode_integer(token);
 		if (value < INT32_MIN || value > INT32_MAX)
 			throw std::overflow_error("Literal overflowed");
 		return (int32_t)value;
@@ -441,7 +499,7 @@ int64_t openddl::decode_int64(const std::string & token)
 {
 	try
 	{
-		int64_t value = decode_integer(token);
+		int64_t value = detail::decode_integer(token);
 		if (value < INT64_MIN || value > INT64_MAX)
 			throw std::overflow_error("Literal overflowed");
 		return value;
@@ -570,7 +628,7 @@ std::string openddl::parse_string(const std::string & token)
 			{
 				if ((length - position) < 1)
 					throw exception("Encountered invalid escape character in token " + token + " whilst parsing string structure");
-				position += read_escape_character(out, token, position + 1) + 1;
+				position += detail::read_escape_character(out, token, position + 1) + 1;
 			}
 			else if (character < 0x20 || (character > 0x7E && character < 0xA0))
 			{

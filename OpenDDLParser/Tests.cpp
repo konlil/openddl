@@ -8,21 +8,6 @@
 #include "catch.hpp"
 #include "openddl.h"
 
-
-TEST_CASE("Encode UTF8 Character", "[encode]") {
-	std::string out;
-	CHECK(openddl::format_utf8(out, 0x21) == "\x21");
-	out.clear();
-	CHECK(openddl::format_utf8(out, 0x100) == "\xC4\x80");
-	out.clear();
-	CHECK(openddl::format_utf8(out, 0x1000) == "\xE1\x80\x80");
-	out.clear();
-	CHECK(openddl::format_utf8(out, 0x10000) == "\xF0\x90\x80\x80");
-	out.clear();
-	CHECK_THROWS(openddl::format_utf8(out, 0x200000));
-	out.clear();
-}
-
 TEST_CASE("OpenDDL Identifier Validation", "[validate]"){
 	CHECK( openddl::is_identifier("hello",0));
 	CHECK(openddl::is_identifier("_hello", 0));
@@ -37,19 +22,6 @@ TEST_CASE("Parse Character Literal", "[parse]") {
 	CHECK(openddl::parse_character_literal("\'\\x01\'", 0) == 0x01);
 	CHECK(openddl::parse_character_literal("\'a\'",0) == 'a');
 	CHECK(openddl::parse_character_literal("\'ABCD\'", 0) == 'ABCD');
-}
-
-TEST_CASE("Read Escape Character", "[read]") {
-	CHECK(openddl::read_escape_character(std::string(), "\\n", 1) == 1);
-	CHECK(openddl::read_escape_character(std::string(), "\\t", 1) == 1);
-	CHECK(openddl::read_escape_character(std::string(), "\\u0021", 1) == 5);
-	CHECK(openddl::read_escape_character(std::string(), "\\U000021", 1) == 7);
-	CHECK(openddl::read_escape_character(std::string(), "\\U000100", 1) == 7);
-	CHECK_THROWS(openddl::read_escape_character(std::string(), "\\j", 1));
-	CHECK_THROWS(openddl::read_escape_character(std::string(), "\\u001", 1));
-	CHECK_NOTHROW(openddl::read_escape_character(std::string(), "\\u0001", 1));
-	CHECK_THROWS(openddl::read_escape_character(std::string(), "\\U00001", 1));
-	CHECK_NOTHROW(openddl::read_escape_character(std::string(), "\\U000001", 1));
 }
 
 TEST_CASE("OpenDDL Name", "[name]") {

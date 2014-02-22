@@ -31,10 +31,8 @@ namespace openddl
 	};
 
 	//Token Processing functions
-	std::string & format_utf8(std::string & out, char32_t token);
 	bool is_identifier(const std::string & token, const unsigned int index);
 	uint64_t parse_character_literal(const std::string & token, const unsigned int index);
-	int read_escape_character(std::string & out, const std::string & token, const unsigned int index);
 	bool is_name(const std::string & token, const unsigned int index);
 	bool is_local_name(const std::string & token, const unsigned int index);
 	Type::enum_t parse_type(const std::string & token);
