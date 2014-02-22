@@ -266,7 +266,7 @@ int openddl::read_escape_character(std::string & out, const std::string & token,
 		const char32_t code_point = std::stoi(token.substr(index + 1, 4), &position, 16);
 		if (position != 4)
 			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
-		if (code_point < 0x0001 || code_point > 0x1FFFFF)
+		if (code_point < 0x0001 || code_point > 0x1FFFF)
 			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
 		format_utf8(out, code_point);
 		return 5;
@@ -278,6 +278,8 @@ int openddl::read_escape_character(std::string & out, const std::string & token,
 		size_t position = 0;
 		const char32_t code_point = std::stoi(token.substr(index + 1, 6), &position, 16);
 		if (position != 6)
+			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
+		if (code_point < 0x0001 || code_point > 0x1FFFF)
 			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
 		format_utf8(out, code_point);
 		return 7;
