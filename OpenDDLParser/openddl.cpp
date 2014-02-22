@@ -69,12 +69,14 @@ namespace detail
 	}
 	//Internal function used to consume characters out of a string and decode them into their utf32 form
 	//Returns decoded character and sets length to number of characters within literal.
-	char32_t decode_utf8(const std::string & token, const unsigned int index, unsigned int & length)
+	char32_t decode_utf8(const std::string & token, const unsigned int index, const unsigned int token_length, unsigned int & length)
 	{
 		char32_t value = 0;
 		// 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 		if ((token[index] & 0xFC) == 0xFC)
 		{
+			if ((token_length - index) < 6)
+				throw std::length_error("");
 			value = ((token[index] & 0x01) << 30) | ((token[index + 1] & 0x3F) << 24)
 				| ((token[index + 2] & 0x3F) << 18) | ((token[index + 3]
 				& 0x3F) << 12)
@@ -84,6 +86,8 @@ namespace detail
 		// 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 		else if ((token[index] & 0xF8) == 0xF8)
 		{
+			if ((token_length - index) < 5)
+				throw std::length_error("");
 			value = ((token[index] & 0x03) << 24) | ((token[index + 1]
 				& 0x3F) << 18)
 				| ((token[index + 2] & 0x3F) << 12) | ((token[index + 3]
@@ -94,6 +98,8 @@ namespace detail
 		// 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 		else if ((token[index] & 0xF0) == 0xF0)
 		{
+			if ((token_length - index) < 4)
+				throw std::length_error("");
 			value = ((token[index] & 0x07) << 18) | ((token[index + 1]
 				& 0x3F) << 12)
 				| ((token[index + 2] & 0x3F) << 6) | (token[index + 3] & 0x3F);
@@ -102,6 +108,8 @@ namespace detail
 		// 1110xxxx 10xxxxxx 10xxxxxx
 		else if ((token[index] & 0xE0) == 0xE0)
 		{
+			if ((token_length - index) < 3)
+				throw std::length_error("");
 			value = ((token[index] & 0x0F) << 12) | ((token[index + 1] & 0x3F) << 6)
 				| (token[index + 2] & 0x3F);
 			length = 3;
@@ -109,12 +117,16 @@ namespace detail
 		// 110xxxxx 10xxxxxx
 		else if ((token[index] & 0xC0) == 0xC0)
 		{
+			if ((token_length - index) < 2)
+				throw std::length_error("");
 			value = ((token[index] & 0x1F) << 6) | (token[index + 1] & 0x3F);
 			length = 2;
 		}
 		// 0xxxxxxx
 		else if (token[index] < 0x80)
 		{
+			if ((token_length - index) < 1)
+				throw std::length_error("");
 			value = token[index];
 			length = 1;
 		}
@@ -278,7 +290,7 @@ namespace detail
 			const char32_t code_point = std::stoi(token.substr(index + 1, 4), &position, 16);
 			if (position != 4)
 				throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
-			if (code_point < 0x0001 || code_point > 0x10FFFF)
+			if (code_point < 0x0001)
 				throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
 			encode_utf8(out, code_point);
 			return 5;
@@ -299,6 +311,23 @@ namespace detail
 		default:
 			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
 		}
+	}
+
+	bool is_valid_character(const char32_t character)
+	{
+		if (character == 0x20 || character == 0x21)
+			return true;
+		if (character >= 0x23 && character <= 0x5B)
+			return true;
+		if (character >= 0x5D && character <= 0x7E)
+			return true;
+		if (character >= 0xA0 && character <= 0xD7FF)
+			return true;
+		if (character >= 0xE000 && character <= 0xFFFD)
+			return true;
+		if (character >= 0x010000 && character <= 0x10FFFF)
+			return true;
+		return false;
 	}
 }
 //================================================================================================================
@@ -623,21 +652,23 @@ std::string openddl::parse_string(const std::string & token)
 		int position = 1;
 		while (position != (length - 1))
 		{
-			const char character = token[position];
+			unsigned int characters_consumed = 0;
+			char32_t character = detail::decode_utf8(token, position, length - 1, characters_consumed);
 			if (character == '\\')
 			{
 				if ((length - position) < 1)
 					throw exception("Encountered invalid escape character in token " + token + " whilst parsing string structure");
 				position += detail::read_escape_character(out, token, position + 1) + 1;
 			}
-			else if (character < 0x20 || (character > 0x7E && character < 0xA0))
+			else if (detail::is_valid_character(character) )
 			{
-				throw exception(std::string("Encountered illegal character '") + character + "' in token " + token + " whilst parsing string structure");
+				for (unsigned int i = 0; i < characters_consumed; i++)
+					out.push_back(token[position + i]);
+				position += characters_consumed;		
 			}
 			else
-			{
-				out.push_back(character);
-				position += 1;
+			{ 		
+				throw exception("Encountered illegal character in token " + token + " whilst parsing string structure");
 			}
 		}
 		return out;
