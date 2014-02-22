@@ -46,10 +46,10 @@ TEST_CASE("Read Escape Character", "[read]") {
 	CHECK(openddl::read_escape_character(std::string(), "\\U000021", 1) == 7);
 	CHECK(openddl::read_escape_character(std::string(), "\\U000100", 1) == 7);
 	CHECK_THROWS(openddl::read_escape_character(std::string(), "\\j", 1));
-	CHECK_THROWS(openddl::read_escape_character(std::string(), "\\u000", 1));
-	CHECK_NOTHROW(openddl::read_escape_character(std::string(), "\\u00000", 1));
-	CHECK_THROWS(openddl::read_escape_character(std::string(), "\\U00000", 1));
-	CHECK_NOTHROW(openddl::read_escape_character(std::string(), "\\U0000000", 1));
+	CHECK_THROWS(openddl::read_escape_character(std::string(), "\\u001", 1));
+	CHECK_NOTHROW(openddl::read_escape_character(std::string(), "\\u00001", 1));
+	CHECK_THROWS(openddl::read_escape_character(std::string(), "\\U00001", 1));
+	CHECK_NOTHROW(openddl::read_escape_character(std::string(), "\\U0000001", 1));
 }
 
 TEST_CASE("OpenDDL Name", "[name]") {
