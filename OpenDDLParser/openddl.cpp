@@ -266,6 +266,8 @@ int openddl::read_escape_character(std::string & out, const std::string & token,
 		const char32_t code_point = std::stoi(token.substr(index + 1, 4), &position, 16);
 		if (position != 4)
 			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
+		if (code_point < 0x0001 || code_point > 0x1FFFFF)
+			throw openddl::exception(std::string("Encountered invalid unicode escape character token token '") + token + "' whilst parsing string structure");
 		format_utf8(out, code_point);
 		return 5;
 	}
@@ -447,7 +449,7 @@ int64_t openddl::decode_int64(const std::string & token)
 		throw exception("'" + token + "' is not a valid 64-bit integer literal");
 	}
 }
-//TODO: Implement this
+
 float openddl::decode_float(const std::string & token)
 {
 	try
@@ -499,7 +501,7 @@ float openddl::decode_float(const std::string & token)
 	}
 
 }
-//TODO: Implement this
+
 double openddl::decode_double(const std::string & token)
 {
 	try
@@ -554,5 +556,31 @@ double openddl::decode_double(const std::string & token)
 //TODO: Implement this
 std::string openddl::parse_string(const std::string & token)
 {
-	return std::string();
+	const int length = token.length();
+	if (length > 1 && token[0] == '"' && token[length - 1] == '"')
+	{
+		std::string out;
+		int position = 1;
+		while (position != (length - 1))
+		{
+			const char character = token[position];
+			if (character == '\\')
+			{
+				if ((length - position) < 1)
+					throw exception("Encountered invalid escape character in token " + token + " whilst parsing string structure");
+				position += read_escape_character(out, token, position + 1) + 1;
+			}
+			else if (character < 0x20 || (character > 0x7E && character < 0xA0))
+			{
+				throw exception(std::string("Encountered illegal character '") + character + "' in token " + token + " whilst parsing string structure");
+			}
+			else
+			{
+				out.push_back(character);
+				position += 1;
+			}
+		}
+		return out;
+	}
+	throw exception("'" + token + "' is not a valid string");
 }

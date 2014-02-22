@@ -229,5 +229,8 @@ TEST_CASE("Decode double", "[decode]") {
 
 }
 TEST_CASE("Parse String", "[parse]") {
-
+	CHECK(openddl::parse_string("\"abcd\"") == "abcd");
+	CHECK(openddl::parse_string("\"\\u0100\"") == "\xC4\x80");
+	CHECK(openddl::parse_string("\"\xC4\x80\"") == "\xC4\x80");
+	
 }
