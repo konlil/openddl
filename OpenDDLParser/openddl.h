@@ -49,7 +49,6 @@ namespace openddl
 	double decode_double(const std::string & token);
 	std::string parse_string(const std::string & token);
 
-	unsigned int consume_whitespace(const std::string & token, const unsigned int index);
-	unsigned int consume_comment(const std::string & token, const unsigned int index);
+	
 };
 
