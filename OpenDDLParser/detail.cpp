@@ -324,5 +324,12 @@ namespace detail
 			return true;
 		return false;
 	}
+
+	bool is_whitespace(const char character)
+	{
+		if (character >= 1 && character <= 32)
+			return true;
+		return false;
+	}
 }
 //================================================================================================================
