@@ -33,4 +33,6 @@ namespace detail {
 	bool is_valid_character(const char32_t character);
 
 	bool is_whitespace(const char character);
+
+	bool is_structural(const char character);
 }

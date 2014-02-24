@@ -229,25 +229,54 @@ TEST_CASE("Consume Token", "[token]") {
 	CHECK(t.consume_token("\'ABCD\' \n\t", 0) == 6);
 	CHECK(t.consume_token("\"ABCD EFGH\" \n\t", 0) == 11);
 	CHECK(t.consume_token("\n\"ABCD EFGH\" \n\t", 0) == 0);
+
 }
 
 TEST_CASE("Tokenizer", "[tokenizer]")
 {
-	openddl::Tokenizer tokenizer;
-	std::string input =
-		"/* Block Comment \n"
-		"//Line Comment \n"
-		"End comment */ \n"
-		" Token1 \n"
-		"\"Token 2\" \n"
-		"/* */	\n	\'Token3\' \n";
-	CHECK_NOTHROW(tokenizer(input));
-	CHECK(tokenizer.tokens.size() == 3);
-	CHECK(tokenizer.tokens[0].substr(input) == "Token1");
-	CHECK(tokenizer.tokens[0].line_number == 4);
-	CHECK(tokenizer.tokens[1].substr(input) == "\"Token 2\"");
-	CHECK(tokenizer.tokens[1].line_number == 5);
-	CHECK(tokenizer.tokens[2].substr(input) == "\'Token3\'");
-	CHECK(tokenizer.tokens[2].line_number == 7);
-	
+	{
+		openddl::Tokenizer tokenizer;
+		std::string input =
+			"/* Block Comment \n"
+			"//Line Comment \n"
+			"End comment */ \n"
+			" Token1 \n"
+			"\"Token 2\" \n"
+			"/* */	\n	\'Token3\' \n";
+		CHECK_NOTHROW(tokenizer(input));
+		CHECK(tokenizer.tokens.size() == 3);
+	}
+	{
+		openddl::Tokenizer tokenizer;
+		std::string input =
+			"unsigned_int32 \n"
+			"{\n"
+			"1094861636, 0x41424344, 0b01000001010000100100001101000100, 'ABCD'\n"
+			"}";
+		CHECK_NOTHROW(tokenizer(input));
+		CHECK(tokenizer.tokens.size() == 10);
+	}
+	{
+		openddl::Tokenizer tokenizer;
+		std::string input =
+			"Vertex \n"
+			"{\n"
+			"float{ 1.0, 2.0, 3.0 }\n"
+			"}";
+		CHECK_NOTHROW(tokenizer(input));
+		CHECK(tokenizer.tokens.size() == 11);
+	}
+	{
+		openddl::Tokenizer tokenizer;
+		std::string input =
+			"VertexArray \n"
+			"{\n"
+			"	float[3]{ \n"
+			"		{1.0, 2.0, 3.0}, {0.5, 0.0, 0.5}, {0.0, -1.0, 4.0}\n"
+			"	}\n"
+			"}";
+		CHECK_NOTHROW(tokenizer(input));
+		CHECK(tokenizer.tokens.size() == 32);
+	}
+
 }

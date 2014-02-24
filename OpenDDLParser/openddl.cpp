@@ -415,6 +415,8 @@ unsigned int openddl::Tokenizer::consume_whitespace(const std::string & token, c
 
 unsigned int openddl::Tokenizer::consume_token(const std::string & token, const unsigned int index)
 {
+	if (detail::is_structural(token[index]))
+		return 1;
 	const unsigned int length = token.length();	
 	bool string_literal = (token[index] == '"');
 	unsigned int characters_consumed = string_literal ? 1 : 0;
@@ -426,6 +428,8 @@ unsigned int openddl::Tokenizer::consume_token(const std::string & token, const 
 				string_literal = false;
 			characters_consumed++;
 		}
+		else if (detail::is_structural(token[position]) && position != index)
+			break;
 		else if (!detail::is_whitespace(token[position]))
 			characters_consumed++;	
 		else

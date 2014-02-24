@@ -335,5 +335,19 @@ namespace detail
 			return true;
 		return false;
 	}
+
+	bool is_structural(const char character)
+	{
+		switch (character)
+		{
+		case ',':
+		case '{':
+		case '}':
+		case '[':
+		case ']':
+			return true;
+		}
+		return false;
+	}
 }
 //================================================================================================================
