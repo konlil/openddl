@@ -449,18 +449,9 @@ void openddl::Tokenizer::operator()(const std::string & token)
 		position += consume_whitespace(token, position);
 		const unsigned int token_length = consume_token(token, position);
 		if (token_length)
-		{
-			Token token;
-			token.start = position;
-			token.length = token_length;
-			token.line_number = line_number;
-			tokens.push_back(token);
-		}
+			tokens.emplace_back(line_number, token.substr(position, token_length));
 		position += token_length;
 	}
 }
-
-std::string openddl::Tokenizer::Token::substr(const std::string & token)
-{
-	return token.substr(start, length);
-}
+openddl::Tokenizer::Token::Token(unsigned int line, const std::string & value)
+	: line_number(line), value(value){}	

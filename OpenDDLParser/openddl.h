@@ -56,9 +56,8 @@ namespace openddl
 		struct Token
 		{
 			unsigned int line_number;
-			unsigned int start;
-			unsigned int length;
-			std::string substr(const std::string & token);
+			std::string value;
+			Token(unsigned int line, const std::string & value);
 		};
 		unsigned int consume_whitespace(const std::string & token, const unsigned int index);
 		unsigned int consume_token(const std::string & token, const unsigned int index);
@@ -66,6 +65,14 @@ namespace openddl
 		std::vector<Token> tokens;
 		void operator()(const std::string & token);
 		Tokenizer() : line_number(1) {}
+	};
+
+	struct Structure
+	{
+		Type::enum_t type;
+		//Used when type == Type::kType
+		std::string identifier;
+		std::string name;
 	};
 	
 };
