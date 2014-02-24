@@ -353,7 +353,7 @@ std::string openddl::parse_string(const std::string & token)
 }
 
 //Consumes whitespace characters and/or comments out of input string token
-unsigned int openddl::consume_whitespace(const std::string & token, const unsigned int index)
+unsigned int openddl::Tokenizer::consume_whitespace(const std::string & token, const unsigned int index)
 {
 	const unsigned int length = token.length();
 	unsigned int characters_consumed = 0;
@@ -361,6 +361,8 @@ unsigned int openddl::consume_whitespace(const std::string & token, const unsign
 	bool line_comment = false;
 	for (unsigned int position = index; position < length; position++)
 	{
+		if (token[position] == '\n')
+			line_number++;
 		if (line_comment)
 		{
 			if (token[position] == '\n')
@@ -377,7 +379,7 @@ unsigned int openddl::consume_whitespace(const std::string & token, const unsign
 			if (token[position] == '*')
 				if (token[position + 1] == '/')
 				{
-					characters_consumed += 2;
+					characters_consumed++;
 					position++;
 					block_comment = false;
 				}
@@ -411,7 +413,7 @@ unsigned int openddl::consume_whitespace(const std::string & token, const unsign
 	return characters_consumed;
 }
 
-unsigned int openddl::consume_token(const std::string & token, const unsigned int index)
+unsigned int openddl::Tokenizer::consume_token(const std::string & token, const unsigned int index)
 {
 	const unsigned int length = token.length();	
 	bool string_literal = (token[index] == '"');
@@ -432,4 +434,29 @@ unsigned int openddl::consume_token(const std::string & token, const unsigned in
 	if (string_literal)
 		throw std::runtime_error("Unexpected end of file");
 	return characters_consumed;
+}
+
+void openddl::Tokenizer::operator()(const std::string & token)
+{
+	const unsigned int length = token.length();
+	unsigned int position = 0;
+	while (position < length)
+	{
+		position += consume_whitespace(token, position);
+		const unsigned int token_length = consume_token(token, position);
+		if (token_length)
+		{
+			Token token;
+			token.start = position;
+			token.length = token_length;
+			token.line_number = line_number;
+			tokens.push_back(token);
+		}
+		position += token_length;
+	}
+}
+
+std::string openddl::Tokenizer::Token::substr(const std::string & token)
+{
+	return token.substr(start, length);
 }

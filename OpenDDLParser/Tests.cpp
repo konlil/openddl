@@ -207,19 +207,47 @@ TEST_CASE("Parse String", "[parse]") {
 	CHECK(openddl::parse_string("\"abcd\"") == "abcd");
 }
 TEST_CASE("Consume Whitespace", "[whitespace]") {
-	CHECK(openddl::consume_whitespace(" ", 0) == 1);
-	CHECK(openddl::consume_whitespace("\t\n ", 0) == 3);
-	CHECK(openddl::consume_whitespace("\t\n abcd", 0) == 3);
-	CHECK(openddl::consume_whitespace("// This is a comment \n", 0) == 22);
-	CHECK(openddl::consume_whitespace("// This is a comment \n Literal", 0) == 23);
-	CHECK_THROWS(openddl::consume_whitespace("/*/* */", 0));
-	CHECK_THROWS(openddl::consume_whitespace("/*", 0));
-	CHECK_NOTHROW(openddl::consume_whitespace("/* //This is a nested comment \n */", 0));
+
+	openddl::Tokenizer t;
+	CHECK(t.consume_whitespace(" ", 0) == 1);
+	CHECK(t.consume_whitespace("\t\n ", 0) == 3);
+	CHECK(t.consume_whitespace("\t\n abcd", 0) == 3);
+	CHECK(t.consume_whitespace("// This is a comment \n", 0) == 22);
+	CHECK(t.consume_whitespace("// This is a comment \n Literal", 0) == 23);
+	CHECK(t.consume_whitespace("/**/", 0) == 4);
+	CHECK_THROWS(t.consume_whitespace("/*/* */", 0));
+	CHECK_THROWS(t.consume_whitespace("/*", 0));
+	CHECK_NOTHROW(t.consume_whitespace("/* //This is a nested comment \n */", 0));
+
 }
 
 TEST_CASE("Consume Token", "[token]") {
-	CHECK(openddl::consume_token("abcd ", 0) == 4);
-	CHECK(openddl::consume_token("0x4444 ", 0) == 6);
-	CHECK(openddl::consume_token("\'ABCD\' ", 0) == 6);
-	CHECK(openddl::consume_token("\"ABCD EFGH\" ", 0) == 11);
+
+	openddl::Tokenizer t;
+	CHECK(t.consume_token("abcd ", 0) == 4);
+	CHECK(t.consume_token("0x4444 ", 0) == 6);
+	CHECK(t.consume_token("\'ABCD\' \n\t", 0) == 6);
+	CHECK(t.consume_token("\"ABCD EFGH\" \n\t", 0) == 11);
+	CHECK(t.consume_token("\n\"ABCD EFGH\" \n\t", 0) == 0);
+}
+
+TEST_CASE("Tokenizer", "[tokenizer]")
+{
+	openddl::Tokenizer tokenizer;
+	std::string input =
+		"/* Block Comment \n"
+		"//Line Comment \n"
+		"End comment */ \n"
+		" Token1 \n"
+		"\"Token 2\" \n"
+		"/* */	\n	\'Token3\' \n";
+	CHECK_NOTHROW(tokenizer(input));
+	CHECK(tokenizer.tokens.size() == 3);
+	CHECK(tokenizer.tokens[0].substr(input) == "Token1");
+	CHECK(tokenizer.tokens[0].line_number == 4);
+	CHECK(tokenizer.tokens[1].substr(input) == "\"Token 2\"");
+	CHECK(tokenizer.tokens[1].line_number == 5);
+	CHECK(tokenizer.tokens[2].substr(input) == "\'Token3\'");
+	CHECK(tokenizer.tokens[2].line_number == 7);
+	
 }

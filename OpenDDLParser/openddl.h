@@ -50,7 +50,23 @@ namespace openddl
 	double decode_double(const std::string & token);
 	std::string parse_string(const std::string & token);
 
-	unsigned int consume_whitespace(const std::string & token, const unsigned int index);
-	unsigned int consume_token(const std::string & token, const unsigned int index);
+	//Used to turn string into sequence of tokens
+	struct Tokenizer
+	{
+		struct Token
+		{
+			unsigned int line_number;
+			unsigned int start;
+			unsigned int length;
+			std::string substr(const std::string & token);
+		};
+		unsigned int consume_whitespace(const std::string & token, const unsigned int index);
+		unsigned int consume_token(const std::string & token, const unsigned int index);
+		unsigned int line_number;
+		std::vector<Token> tokens;
+		void operator()(const std::string & token);
+		Tokenizer() : line_number(1) {}
+	};
+	
 };
 
