@@ -276,7 +276,7 @@ TEST_CASE("Tokenizer", "[tokenizer]")
 			"	}\n"
 			"}";
 		CHECK_NOTHROW(tokenizer(input));
-		CHECK(tokenizer.tokens.size() == 32);
+		CHECK(tokenizer.tokens.size() == 29);
 	}
 
 }

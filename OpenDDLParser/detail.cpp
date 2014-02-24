@@ -343,8 +343,6 @@ namespace detail
 		case ',':
 		case '{':
 		case '}':
-		case '[':
-		case ']':
 			return true;
 		}
 		return false;
