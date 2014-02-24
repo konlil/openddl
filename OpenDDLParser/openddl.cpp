@@ -351,3 +351,85 @@ std::string openddl::parse_string(const std::string & token)
 	}
 	throw exception("'" + token + "' is not a valid string");
 }
+
+//Consumes whitespace characters and/or comments out of input string token
+unsigned int openddl::consume_whitespace(const std::string & token, const unsigned int index)
+{
+	const unsigned int length = token.length();
+	unsigned int characters_consumed = 0;
+	bool block_comment = false;
+	bool line_comment = false;
+	for (unsigned int position = index; position < length; position++)
+	{
+		if (line_comment)
+		{
+			if (token[position] == '\n')
+			{
+				line_comment = false;
+			}
+			characters_consumed += 1;
+		}
+		else if (block_comment)
+		{
+			if (token[position] == '/')
+				if (token[position + 1] == '*' && block_comment)
+					throw std::runtime_error("Block Comments may not be nested");
+			if (token[position] == '*')
+				if (token[position + 1] == '/')
+				{
+					characters_consumed += 2;
+					position++;
+					block_comment = false;
+				}
+			characters_consumed++;
+		}
+		else
+		{
+			if (token[position] == '/')
+			{
+				if (token[position + 1] == '*')
+				{
+					block_comment = true;
+					position++;
+					characters_consumed += 2;
+				}
+				else if (token[position + 1] == '/')
+				{
+					line_comment = true;
+					position++;
+					characters_consumed += 2;
+				}
+			}
+			else if (detail::is_whitespace(token[position]))
+				characters_consumed++;
+			else
+				break;
+		}
+	}
+	if (block_comment)
+		throw std::runtime_error("Unexpected end of file");
+	return characters_consumed;
+}
+
+unsigned int openddl::consume_token(const std::string & token, const unsigned int index)
+{
+	const unsigned int length = token.length();	
+	bool string_literal = (token[index] == '"');
+	unsigned int characters_consumed = string_literal ? 1 : 0;
+	for (unsigned int position = index + (string_literal ? 1 : 0); position < length; position++)
+	{
+		if (string_literal)
+		{
+			if (token[position] == '"' && token[position - 1] != '/')
+				string_literal = false;
+			characters_consumed++;
+		}
+		else if (!detail::is_whitespace(token[position]))
+			characters_consumed++;	
+		else
+			break;
+	}
+	if (string_literal)
+		throw std::runtime_error("Unexpected end of file");
+	return characters_consumed;
+}

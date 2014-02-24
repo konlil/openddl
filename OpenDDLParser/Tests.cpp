@@ -206,3 +206,20 @@ TEST_CASE("Parse String", "[parse]") {
 	CHECK(openddl::parse_string("\"\xEA\x80\x90\"") == "\xEA\x80\x90");
 	CHECK(openddl::parse_string("\"abcd\"") == "abcd");
 }
+TEST_CASE("Consume Whitespace", "[whitespace]") {
+	CHECK(openddl::consume_whitespace(" ", 0) == 1);
+	CHECK(openddl::consume_whitespace("\t\n ", 0) == 3);
+	CHECK(openddl::consume_whitespace("\t\n abcd", 0) == 3);
+	CHECK(openddl::consume_whitespace("// This is a comment \n", 0) == 22);
+	CHECK(openddl::consume_whitespace("// This is a comment \n Literal", 0) == 23);
+	CHECK_THROWS(openddl::consume_whitespace("/*/* */", 0));
+	CHECK_THROWS(openddl::consume_whitespace("/*", 0));
+	CHECK_NOTHROW(openddl::consume_whitespace("/* //This is a nested comment \n */", 0));
+}
+
+TEST_CASE("Consume Token", "[token]") {
+	CHECK(openddl::consume_token("abcd ", 0) == 4);
+	CHECK(openddl::consume_token("0x4444 ", 0) == 6);
+	CHECK(openddl::consume_token("\'ABCD\' ", 0) == 6);
+	CHECK(openddl::consume_token("\"ABCD EFGH\" ", 0) == 11);
+}
