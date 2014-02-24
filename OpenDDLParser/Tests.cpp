@@ -242,7 +242,7 @@ TEST_CASE("Tokenizer", "[tokenizer]")
 			"End comment */ \n"
 			" Token1 \n"
 			"\"Token 2\" \n"
-			"/* */	\n	\'Token3\' \n";
+			"/* */	\n	'Token3' \n";
 		CHECK_NOTHROW(tokenizer(input));
 		CHECK(tokenizer.tokens.size() == 3);
 	}
@@ -251,7 +251,7 @@ TEST_CASE("Tokenizer", "[tokenizer]")
 		std::string input =
 			"unsigned_int32 \n"
 			"{\n"
-			"1094861636, 0x41424344, 0b01000001010000100100001101000100, 'ABCD'\n"
+			"	1094861636, 0x41424344, 0b01000001010000100100001101000100, 'ABCD'\n"
 			"}";
 		CHECK_NOTHROW(tokenizer(input));
 		CHECK(tokenizer.tokens.size() == 10);
@@ -261,7 +261,7 @@ TEST_CASE("Tokenizer", "[tokenizer]")
 		std::string input =
 			"Vertex \n"
 			"{\n"
-			"float{ 1.0, 2.0, 3.0 }\n"
+			"	float{ 1.0, 2.0, 3.0 }\n"
 			"}";
 		CHECK_NOTHROW(tokenizer(input));
 		CHECK(tokenizer.tokens.size() == 11);
