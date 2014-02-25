@@ -10,6 +10,10 @@
 namespace openddl
 {
 	using exception = std::runtime_error;
+	struct Reference
+	{
+
+	};
 	struct Type
 	{
 		enum enum_t {
@@ -29,6 +33,23 @@ namespace openddl
 			kType,
 			kCount
 		};
+
+		//Helper templates for converting between c++ types and type enum
+		template <typename T> enum_t get()		{ return kCount; }
+		template <> enum_t get<bool>()			{ return kBool; }
+		template <> enum_t get<int8_t>()		{ return kInt8; }
+		template <> enum_t get<int16_t>()		{ return kInt16; }
+		template <> enum_t get<int32_t>()		{ return kInt32; }
+		template <> enum_t get<int64_t>()		{ return kInt64; }
+		template <> enum_t get<uint8_t>()		{ return kUnsignedInt8; }
+		template <> enum_t get<uint16_t>()		{ return kUnsignedInt16; }
+		template <> enum_t get<uint32_t>()		{ return kUnsignedInt32; }
+		template <> enum_t get<uint64_t>()		{ return kUnsignedInt64; }
+		template <> enum_t get<float>()			{ return kFloat; }
+		template <> enum_t get<double>()		{ return kDouble; }
+		template <> enum_t get<std::string>()	{ return kString; }
+		template <> enum_t get<Reference>()		{ return kRef; }
+
 	};
 
 	//Token Processing functions
@@ -67,13 +88,30 @@ namespace openddl
 		Tokenizer() : line_number(1) {}
 	};
 
-	struct Structure
+	struct Parser
 	{
-		Type::enum_t type;
-		//Used when type == Type::kType
-		std::string identifier;
-		std::string name;
+		
+		struct Adapter
+		{
+			virtual void push_list(Type::enum_t type) = 0;
+			virtual void add_value(const int8_t value) = 0;
+			virtual void add_value(const int16_t value) = 0;
+			virtual void add_value(const int32_t value) = 0;
+			virtual void add_value(const int64_t value) = 0;
+			virtual void add_value(const uint8_t value) = 0;
+			virtual void add_value(const uint16_t value) = 0;
+			virtual void add_value(const uint32_t value) = 0;
+			virtual void add_value(const uint64_t value) = 0;
+			virtual void add_value(const float value) = 0;
+			virtual void add_value(const double value) = 0;
+			virtual void add_value(const std::string & value) = 0;
+			virtual void pop() = 0;
+		};
+
+		void operator()(const Tokenizer & tokens, Adapter & adapter);
 	};
+	
+
 	
 };
 
