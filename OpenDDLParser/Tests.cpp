@@ -278,5 +278,29 @@ TEST_CASE("Tokenizer", "[tokenizer]")
 		CHECK_NOTHROW(tokenizer(input));
 		CHECK(tokenizer.tokens.size() == 29);
 	}
+}
 
+TEST_CASE("Parser", "[parser]"){
+	struct TestAdapter : public openddl::Parser::Adapter
+	{
+		virtual void push_list(openddl::Type::enum_t type) { list_type = type; }
+		virtual void pop() { popped = true; };
+		virtual void push_value(openddl::Value & value) { values.push_back(value.get<float>()); }
+
+		openddl::Type::enum_t list_type;
+		std::vector<float> values;
+		bool popped;
+		TestAdapter() : list_type(openddl::Type::kCount), popped(false) {}
+	};
+	std::string input = "float{ 1.0, 2.0 }";
+	openddl::Tokenizer t;
+	TestAdapter adapter;
+	CHECK_NOTHROW(t(input));
+	CHECK(t.tokens.size() == 6);
+	unsigned int tokens_consumed = 0;
+	CHECK_NOTHROW(tokens_consumed = openddl::Parser::parse_data_list(t.tokens, adapter, 0));
+	CHECK(tokens_consumed == 6);
+	CHECK(adapter.list_type == openddl::Type::kFloat);
+	CHECK(adapter.popped == true);
+	CHECK(adapter.values.size() == 2);
 }

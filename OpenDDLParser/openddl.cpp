@@ -455,3 +455,42 @@ void openddl::Tokenizer::operator()(const std::string & token)
 }
 openddl::Tokenizer::Token::Token(unsigned int line, const std::string & value)
 	: line_number(line), value(value){}	
+
+unsigned int openddl::Parser::parse_data_list(const std::vector<openddl::Tokenizer::Token> & tokens, Adapter & adapter, const unsigned int index)
+{
+	Type::enum_t type = parse_type(tokens[index].value);
+	unsigned int token_count = tokens.size();
+	unsigned int position = index+1;
+	if (tokens[position].value == "{")
+	{
+		std::vector<Value> values;
+		position++;
+		while (position < token_count)
+		{
+			switch (type)
+			{
+			case Type::kFloat:
+				values.push_back(Value(decode_float(tokens[position].value)));
+			}
+			position++;
+			if (tokens[position].value == ",")
+			{
+				position++;
+			}
+			else if (tokens[position].value == "}")
+			{
+				position++;
+				break;
+			}
+			else
+				throw exception("Incomplete data list");	
+		}
+		adapter.push_list(type);
+		for (auto & value : values)
+			adapter.push_value(value);
+		adapter.pop();
+	}
+	
+
+	return position-index;
+}
