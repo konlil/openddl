@@ -456,6 +456,37 @@ void openddl::Tokenizer::operator()(const std::string & token)
 openddl::Tokenizer::Token::Token(unsigned int line, const std::string & value)
 	: line_number(line), value(value){}	
 
+openddl::Value openddl::decode_value(const std::string & token, Type::enum_t type)
+{
+	switch (type)
+	{
+	case Type::kBool:
+		return Value(decode_boolean(token));
+	case Type::kFloat:
+		return Value(decode_float(token));
+	case Type::kDouble:
+		return Value(decode_double(token));
+	case Type::kInt8:
+		return Value(decode_int8(token));
+	case Type::kInt16:
+		return Value(decode_int16(token));
+	case Type::kInt32:
+		return Value(decode_int32(token));
+	case Type::kInt64:
+		return Value(decode_int64(token));
+	case Type::kUnsignedInt8:
+		return Value(decode_unsigned_int8(token));
+	case Type::kUnsignedInt16:
+		return Value(decode_unsigned_int16(token));
+	case Type::kUnsignedInt32:
+		return Value(decode_unsigned_int32(token));
+	case Type::kUnsignedInt64:
+		return Value(decode_unsigned_int64(token));
+	default:
+		throw exception("Not implemented yet");
+	}
+}
+
 unsigned int openddl::Parser::parse_data_list(const std::vector<openddl::Tokenizer::Token> & tokens, Adapter & adapter, const unsigned int index)
 {
 	Type::enum_t type = parse_type(tokens[index].value);
@@ -467,11 +498,7 @@ unsigned int openddl::Parser::parse_data_list(const std::vector<openddl::Tokeniz
 		position++;
 		while (position < token_count)
 		{
-			switch (type)
-			{
-			case Type::kFloat:
-				values.push_back(Value(decode_float(tokens[position].value)));
-			}
+			values.push_back(decode_value(tokens[position].value, type));
 			position++;
 			if (tokens[position].value == ",")
 			{

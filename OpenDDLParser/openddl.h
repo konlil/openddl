@@ -123,6 +123,8 @@ namespace openddl
 	double decode_double(const std::string & token);
 	std::string parse_string(const std::string & token);
 
+	Value decode_value(const std::string & token, Type::enum_t type);
+
 	//Used to turn string into sequence of tokens
 	struct Tokenizer
 	{
