@@ -125,37 +125,6 @@ namespace openddl
 
 	Value decode_value(const std::string & token, Type::enum_t type);
 
-	//Used to turn string into sequence of tokens
-	struct Tokenizer
-	{
-		struct Token
-		{
-			unsigned int line_number;
-			std::string value;
-			Token(unsigned int line, const std::string & value);
-		};
-		unsigned int consume_whitespace(const std::string & token, const unsigned int index);
-		unsigned int consume_token(const std::string & token, const unsigned int index);
-		unsigned int line_number;
-		std::vector<Token> tokens;
-		void operator()(const std::string & token);
-		Tokenizer() : line_number(1) {}
-	};
-
-	struct Parser
-	{
-		
-		struct Adapter
-		{
-			
-			virtual void push_value(Value & value) {};
-
-			virtual void push_list(Type::enum_t type) = 0;
-			virtual void pop() = 0;
-		};
-
-		static unsigned int parse_data_list(const std::vector<openddl::Tokenizer::Token> & tokens, Adapter & adapter, const unsigned int index);
-	};
 	
 
 	

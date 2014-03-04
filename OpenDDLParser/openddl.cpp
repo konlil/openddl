@@ -84,7 +84,7 @@ openddl::Type::enum_t openddl::parse_type(const std::string & token)
 		if (token == type_identifiers[i])
 			return Type::enum_t(i);
 	}
-	throw openddl::exception("Invalid Type Identifier");
+	return Type::kCount;
 }
 
 bool openddl::decode_boolean(const std::string & token)
@@ -352,109 +352,6 @@ std::string openddl::parse_string(const std::string & token)
 	throw exception("'" + token + "' is not a valid string");
 }
 
-//Consumes whitespace characters and/or comments out of input string token
-unsigned int openddl::Tokenizer::consume_whitespace(const std::string & token, const unsigned int index)
-{
-	const unsigned int length = token.length();
-	unsigned int characters_consumed = 0;
-	bool block_comment = false;
-	bool line_comment = false;
-	for (unsigned int position = index; position < length; position++)
-	{
-		if (token[position] == '\n')
-			line_number++;
-		if (line_comment)
-		{
-			if (token[position] == '\n')
-			{
-				line_comment = false;
-			}
-			characters_consumed += 1;
-		}
-		else if (block_comment)
-		{
-			if (token[position] == '/')
-				if (token[position + 1] == '*' && block_comment)
-					throw std::runtime_error("Block Comments may not be nested");
-			if (token[position] == '*')
-				if (token[position + 1] == '/')
-				{
-					characters_consumed++;
-					position++;
-					block_comment = false;
-				}
-			characters_consumed++;
-		}
-		else
-		{
-			if (token[position] == '/')
-			{
-				if (token[position + 1] == '*')
-				{
-					block_comment = true;
-					position++;
-					characters_consumed += 2;
-				}
-				else if (token[position + 1] == '/')
-				{
-					line_comment = true;
-					position++;
-					characters_consumed += 2;
-				}
-			}
-			else if (detail::is_whitespace(token[position]))
-				characters_consumed++;
-			else
-				break;
-		}
-	}
-	if (block_comment)
-		throw std::runtime_error("Unexpected end of file");
-	return characters_consumed;
-}
-
-unsigned int openddl::Tokenizer::consume_token(const std::string & token, const unsigned int index)
-{
-	if (detail::is_structural(token[index]))
-		return 1;
-	const unsigned int length = token.length();	
-	bool string_literal = (token[index] == '"');
-	unsigned int characters_consumed = string_literal ? 1 : 0;
-	for (unsigned int position = index + (string_literal ? 1 : 0); position < length; position++)
-	{
-		if (string_literal)
-		{
-			if (token[position] == '"' && token[position - 1] != '/')
-				string_literal = false;
-			characters_consumed++;
-		}
-		else if (detail::is_structural(token[position]) && position != index)
-			break;
-		else if (!detail::is_whitespace(token[position]))
-			characters_consumed++;	
-		else
-			break;
-	}
-	if (string_literal)
-		throw std::runtime_error("Unexpected end of file");
-	return characters_consumed;
-}
-
-void openddl::Tokenizer::operator()(const std::string & token)
-{
-	const unsigned int length = token.length();
-	unsigned int position = 0;
-	while (position < length)
-	{
-		position += consume_whitespace(token, position);
-		const unsigned int token_length = consume_token(token, position);
-		if (token_length)
-			tokens.emplace_back(line_number, token.substr(position, token_length));
-		position += token_length;
-	}
-}
-openddl::Tokenizer::Token::Token(unsigned int line, const std::string & value)
-	: line_number(line), value(value){}	
 
 openddl::Value openddl::decode_value(const std::string & token, Type::enum_t type)
 {
@@ -485,39 +382,4 @@ openddl::Value openddl::decode_value(const std::string & token, Type::enum_t typ
 	default:
 		throw exception("Not implemented yet");
 	}
-}
-
-unsigned int openddl::Parser::parse_data_list(const std::vector<openddl::Tokenizer::Token> & tokens, Adapter & adapter, const unsigned int index)
-{
-	Type::enum_t type = parse_type(tokens[index].value);
-	unsigned int token_count = tokens.size();
-	unsigned int position = index+1;
-	if (tokens[position].value == "{")
-	{
-		std::vector<Value> values;
-		position++;
-		while (position < token_count)
-		{
-			values.push_back(decode_value(tokens[position].value, type));
-			position++;
-			if (tokens[position].value == ",")
-			{
-				position++;
-			}
-			else if (tokens[position].value == "}")
-			{
-				position++;
-				break;
-			}
-			else
-				throw exception("Incomplete data list");	
-		}
-		adapter.push_list(type);
-		for (auto & value : values)
-			adapter.push_value(value);
-		adapter.pop();
-	}
-	
-
-	return position-index;
 }
