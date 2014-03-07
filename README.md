@@ -3,9 +3,10 @@ openddl
 
 OpenDDL Parser written in C++. Current status is pre-alpha. 
 
-This project isn't dead. Just been working on an experimental branch using
-ragel to generate the parser function. Some of the written functionality in
-this branch will be reused but no concrete plans as to when the ragel branch 
-will be released.
+A lexer has been implemented in Ragel but is missing some documentation 
+and internal cleanup. Tests have not been written for the lexer yet.
+Two classes of test will be need to be written, stress test and 
+functionality validation.
 
-
+With these written, focus can switch to writing the parser by
+hand or using a tool such as LEMON.
