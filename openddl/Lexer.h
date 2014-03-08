@@ -10,26 +10,60 @@ namespace openddl
 {
 	struct Token
 	{
-		enum type_t
+		enum token_t
 		{
-			kArrayDataType,
+
+			kComma,
+			kLeftBrace,
+			kRightBrace,	
+			kArrayType,
 			kDataType,
 			kIdentifier,
 			kName,
-			kBoolean,
+			kLiteral,
+			kEquals,
+			kNull
+			
+		};
+		enum type_t
+		{
 			kFloat,
-			kHex,
-			kDecimal,
-			kBinary,
+			kDouble,
+			kRef,
+			kUnsignedInt8,
+			kUnsignedInt16,
+			kUnsignedInt32,
+			kUnsignedInt64,
+			kInt8,
+			kInt16,
+			kInt32,
+			kInt64,
+			kBool,
 			kString,
-			kCharacter,
-			kComma,
-			kLeftBrace,
-			kRightBrace,
+			kType,
+			kInvalidType
+		};
+		enum literal_t
+		{
+			kBooleanLiteral = 1 << 0,
+			kFloatLiteral = 1 << 1,
+			kHexLiteral = 1 << 2,
+			kDecimalLiteral = 1 << 3,
+			kBinaryLiteral = 1 << 4,
+			kStringLiteral = 1 << 5,
+			kCharacterLiteral = 1 << 6,
+			kInvalidLiteral = 0
 		};
 
-		type_t code;
+		token_t		token_type;			
+		type_t		data_type;			//Used only if token_type == kDataType || kArrayType
+		literal_t	literal_type;		//Used only if token_type == kLiteral
+		unsigned int array_size;		//Set to value within braces if type array notation is used.
+
 		std::string payload;
+
+		
+		unsigned int line, position;
 		unsigned int range_start;
 		unsigned int range_length;
 
@@ -39,7 +73,7 @@ namespace openddl
 		
 		std::string payload;				//The literal (as string) which caused the error
 		std::string message;				//Plain text key describing error		
-		std::string position;				//Position of the error within the string/file
+		unsigned int line, position;		//Position of the error within the string/file
 		unsigned int range_start;			//Position of offset of offending literal in string
 		unsigned int range_length;
 	};
