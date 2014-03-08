@@ -1,5 +1,10 @@
 
 #line 1 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+//================================================================================================================
+// Copyright 2014 Denis Hilliard (armchaircommando@gmail.com)
+// Licensed under MIT License
+//================================================================================================================
+
 #include "stdafx.h"
 #include "Lexer.h"
 #include <sstream>
@@ -10,7 +15,8 @@ void lex_error(const std::string & name, std::vector<openddl::TokenError> & erro
 	formatter <<"("<< line << ":" << position << ")";
 	openddl::TokenError error;
 	error.payload = std::string(ts,te);
-	error.message = name + " @ " + formatter.str();
+	error.message = name; 
+	error.position = formatter.str();
 	error.range_start = unsigned int(ts-p);
 	error.range_length = te - ts;
 	errors.push_back(error);
@@ -44,10 +50,10 @@ void lex_emit(openddl::Token::type_t code, std::vector<openddl::Token>& tokens, 
 }
 
 #define e(t) lex_emit(t, tokens,input.c_str(), ts, te)
-#define error(m,s,e) lex_error(m, errors,input.c_str(),s,e,curline,te-line_start)
+#define error(m) lex_error(m, errors,input.c_str(),ts,te,curline,ts-line_start)
 
 
-#line 48 ".\\Lexer.cpp"
+#line 54 ".\\Lexer.cpp"
 static const char _Lexer_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 1, 
@@ -536,7 +542,7 @@ static const int Lexer_en_recover_string_literal = 45;
 static const int Lexer_en_main = 47;
 
 
-#line 147 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 153 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 
 
 
@@ -559,7 +565,7 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 
 	char const *line_start = p;
 	
-#line 556 ".\\Lexer.cpp"
+#line 562 ".\\Lexer.cpp"
 	{
 	cs = Lexer_start;
 	ts = 0;
@@ -567,9 +573,9 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 	act = 0;
 	}
 
-#line 169 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 175 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	
-#line 562 ".\\Lexer.cpp"
+#line 568 ".\\Lexer.cpp"
 	{
 	int _klen;
 	unsigned int _trans;
@@ -590,7 +596,7 @@ _resume:
 #line 1 "NONE"
 	{ts = p;}
 	break;
-#line 581 ".\\Lexer.cpp"
+#line 587 ".\\Lexer.cpp"
 		}
 	}
 
@@ -657,30 +663,30 @@ _eof_trans:
 		switch ( *_acts++ )
 		{
 	case 0:
-#line 51 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 57 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{
-		error("lex.invalid_character",te-1,p+1); 
+		error("lex.invalid_character"); 
 		{cs = 47; goto _again;}
 	}
 	break;
 	case 3:
-#line 66 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 72 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{ curline++; line_start = p;}
 	break;
 	case 4:
-#line 76 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
-	{error("lex.nested_block_comment",ts,te);}
+#line 82 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+	{error("lex.nested_block_comment");}
 	break;
 	case 5:
-#line 83 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 89 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{characters_consumed++;}
 	break;
 	case 6:
-#line 83 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 89 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{characters_consumed++;}
 	break;
 	case 7:
-#line 83 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 89 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{characters_consumed = 0;}
 	break;
 	case 10:
@@ -688,131 +694,131 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 11:
-#line 101 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 107 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 2;}
 	break;
 	case 12:
-#line 102 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 108 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 3;}
 	break;
 	case 13:
-#line 103 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 109 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 4;}
 	break;
 	case 14:
-#line 106 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 112 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 5;}
 	break;
 	case 15:
-#line 109 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 115 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 6;}
 	break;
 	case 16:
-#line 112 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 118 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 7;}
 	break;
 	case 17:
-#line 118 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 124 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ e(openddl::Token::kArrayDataType);}}
 	break;
 	case 18:
-#line 122 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 128 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ e(openddl::Token::kString);}}
 	break;
 	case 19:
-#line 127 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
-	{te = p+1;{ if(characters_consumed > 7) error("lex.character_length_error",ts,te); else e(openddl::Token::kCharacter);}}
+#line 133 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+	{te = p+1;{ if(characters_consumed > 7) error("lex.character_length_error"); else e(openddl::Token::kCharacter);}}
 	break;
 	case 20:
-#line 133 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 139 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;}
 	break;
 	case 21:
-#line 136 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 142 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ e(openddl::Token::kComma);}}
 	break;
 	case 22:
-#line 137 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 143 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ e(openddl::Token::kLeftBrace);}}
 	break;
 	case 23:
-#line 138 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 144 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ e(openddl::Token::kRightBrace);}}
 	break;
 	case 24:
-#line 139 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
-	{te = p+1;{error("lex.free_close_comment",ts,te);}}
+#line 145 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+	{te = p+1;{error("lex.free_close_comment");}}
 	break;
 	case 25:
-#line 141 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 147 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;}
 	break;
 	case 26:
-#line 143 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 149 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ error("lex.unrecognised_character",ts,te);}}
 	break;
 	case 27:
-#line 100 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 106 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ e(openddl::Token::kDecimal); }}
 	break;
 	case 28:
-#line 103 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 109 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ e(openddl::Token::kFloat);}}
 	break;
 	case 29:
-#line 106 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
-	{te = p;p--;{ error("lex.invalid_literal",ts,te);}}
+#line 112 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+	{te = p;p--;{ error("lex.invalid_literal");}}
 	break;
 	case 30:
-#line 112 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 118 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ e(openddl::Token::kName);}}
 	break;
 	case 31:
-#line 113 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 119 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ e(openddl::Token::kIdentifier);}}
 	break;
 	case 32:
-#line 116 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 122 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ e(openddl::Token::kDataType);}}
 	break;
 	case 33:
-#line 124 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 130 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ {cs = 45; goto _again;}}}
 	break;
 	case 34:
-#line 129 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 135 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ {cs = 43; goto _again;}}}
 	break;
 	case 35:
-#line 132 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 138 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;}
 	break;
 	case 36:
-#line 142 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 148 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;}
 	break;
 	case 37:
-#line 143 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 149 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ error("lex.unrecognised_character",ts,te);}}
 	break;
 	case 38:
-#line 113 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 119 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{{p = ((te))-1;}{ e(openddl::Token::kIdentifier);}}
 	break;
 	case 39:
-#line 116 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 122 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{{p = ((te))-1;}{ e(openddl::Token::kDataType);}}
 	break;
 	case 40:
-#line 124 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 130 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{{p = ((te))-1;}{ {cs = 45; goto _again;}}}
 	break;
 	case 41:
-#line 129 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 135 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{{p = ((te))-1;}{ {cs = 43; goto _again;}}}
 	break;
 	case 42:
-#line 143 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 149 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{{p = ((te))-1;}{ error("lex.unrecognised_character",ts,te);}}
 	break;
 	case 43:
@@ -828,7 +834,7 @@ _eof_trans:
 	{{p = ((te))-1;} e(openddl::Token::kFloat);}
 	break;
 	case 5:
-	{{p = ((te))-1;} error("lex.invalid_literal",ts,te);}
+	{{p = ((te))-1;} error("lex.invalid_literal");}
 	break;
 	case 6:
 	{{p = ((te))-1;} e(openddl::Token::kBoolean);}
@@ -839,7 +845,7 @@ _eof_trans:
 	}
 	}
 	break;
-#line 789 ".\\Lexer.cpp"
+#line 795 ".\\Lexer.cpp"
 		}
 	}
 
@@ -852,7 +858,7 @@ _again:
 #line 1 "NONE"
 	{ts = 0;}
 	break;
-#line 800 ".\\Lexer.cpp"
+#line 806 ".\\Lexer.cpp"
 		}
 	}
 
@@ -872,18 +878,18 @@ _again:
 	while ( __nacts-- > 0 ) {
 		switch ( *__acts++ ) {
 	case 1:
-#line 55 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 61 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{
-		error("lex.unterminated_character_literal",ts,te);
+		error("lex.unterminated_character_literal");
 	}
 	break;
 	case 2:
-#line 60 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 66 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{
-		error("lex.unterminated_string_literal",ts,te);
+		error("lex.unterminated_string_literal");
 	}
 	break;
-#line 828 ".\\Lexer.cpp"
+#line 834 ".\\Lexer.cpp"
 		}
 	}
 	}
@@ -891,7 +897,7 @@ _again:
 	_out: {}
 	}
 
-#line 170 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 176 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	
 	return (p==pe);
 }

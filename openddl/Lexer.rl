@@ -13,7 +13,8 @@ void lex_error(const std::string & name, std::vector<openddl::TokenError> & erro
 	formatter <<"("<< line << ":" << position << ")";
 	openddl::TokenError error;
 	error.payload = std::string(ts,te);
-	error.message = name + " @ " + formatter.str();
+	error.message = name; 
+	error.position = formatter.str();
 	error.range_start = unsigned int(ts-p);
 	error.range_length = te - ts;
 	errors.push_back(error);
@@ -47,23 +48,23 @@ void lex_emit(openddl::Token::type_t code, std::vector<openddl::Token>& tokens, 
 }
 
 #define e(t) lex_emit(t, tokens,input.c_str(), ts, te)
-#define error(m,s,e) lex_error(m, errors,input.c_str(),s,e,curline,te-line_start)
+#define error(m) lex_error(m, errors,input.c_str(),ts,te,curline,ts-line_start)
 
 %%{
   	machine Lexer;
 	write data;
 
 	action invalid_character_error {
-		error("lex.invalid_character",te-1,p+1); 
+		error("lex.invalid_character"); 
 		fgoto main;
 	}
 	action unterminated_character_literal{
-		error("lex.unterminated_character_literal",ts,te);
+		error("lex.unterminated_character_literal");
 	}
 	recover_character_literal := ^"'"+ "'" @invalid_character_error @/unterminated_character_literal;
 
 	action unterminated_string_literal{
-		error("lex.unterminated_string_literal",ts,te);
+		error("lex.unterminated_string_literal");
 	}
 	recover_string_literal := ^'"'+ '"' @invalid_character_error @/unterminated_string_literal;
 
@@ -78,7 +79,7 @@ void lex_emit(openddl::Token::type_t code, std::vector<openddl::Token>& tokens, 
 		(0xF0..0xF3) (0x90..0xBF) (0x80..0xBF) (0x80..0xBF) |
 		0xF4 (0x90..0xBF) (0x80..0xBF) (0x80..0xBF);
 
-	block_comment = '/*' ( any-'\n' | newline  | '/*' @{error("lex.nested_block_comment",ts,te);} )*  :>> '*/';
+	block_comment = '/*' ( any-'\n' | newline  | '/*' @{error("lex.nested_block_comment");} )*  :>> '*/';
 	
 	decimal_literal = [+\-]? digit+;
 	binary_literal = [+\-]? '0' [bB] [01]+;
@@ -108,7 +109,7 @@ void lex_emit(openddl::Token::type_t code, std::vector<openddl::Token>& tokens, 
 		float_literal		=>	{ e(openddl::Token::kFloat);};
 		#Fallback rule to catch improperly formatted numeric literals
 		(decimal_literal|hex_literal|binary_literal|float_literal) ^(0x01..0x20|[,{}])+ 
-							=> { error("lex.invalid_literal",ts,te);};
+							=> { error("lex.invalid_literal");};
 
 		#Boolean Literal
 		bool_literal		=>	{ e(openddl::Token::kBoolean);};
@@ -129,7 +130,7 @@ void lex_emit(openddl::Token::type_t code, std::vector<openddl::Token>& tokens, 
 		'"'					=> { fgoto recover_string_literal;};
 
 		# Character Literal
-		character_literal	=> { if(characters_consumed > 7) error("lex.character_length_error",ts,te); else e(openddl::Token::kCharacter);}; 
+		character_literal	=> { if(characters_consumed > 7) error("lex.character_length_error"); else e(openddl::Token::kCharacter);}; 
 		# Fallback path for catching errors
 		"'"					=> { fgoto recover_character_literal;};
 
@@ -141,7 +142,7 @@ void lex_emit(openddl::Token::type_t code, std::vector<openddl::Token>& tokens, 
 		',' =>						{ e(openddl::Token::kComma);};
 		'{' =>						{ e(openddl::Token::kLeftBrace);};
 		'}' =>						{ e(openddl::Token::kRightBrace);};
-		'*/' =>						{error("lex.free_close_comment",ts,te);};
+		'*/' =>						{error("lex.free_close_comment");};
 		# Whitespace
 		(0x01..0x20)-'\n';
 		newline;
