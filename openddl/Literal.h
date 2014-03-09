@@ -31,7 +31,7 @@ namespace openddl
 		template <typename T> const typename std::enable_if<std::is_same<bool, T>::value, T>::type get()
 		{ 
 			if (type == kBoolean) return u_.b_value; 
-			else throw type_error("Type Conversion Error (Boolean)"); 
+			else throw type_error("Type Conversion Error"); 
 		}
 		
 		template <typename T>
@@ -55,7 +55,7 @@ namespace openddl
 					throw type_error("Overflow");
 				return negate ? -(T)u_.i_value : (T)u_.i_value;
 			}
-			else throw type_error("Type Conversion Error (Integer)");
+			else throw type_error("Type Conversion Error");
 		}
 		template <typename T>
 		const typename std::enable_if<is_unsigned_integer<T>::value, T>::type get()
@@ -66,9 +66,22 @@ namespace openddl
 				if (u_.i_value > std::numeric_limits<T>::max()) throw type_error("Overflow");
 				return (T)u_.i_value;
 			}
-			else throw type_error("Type Conversion Error (Unsigned Integer)");
+			else throw type_error("Type Conversion Error");
 		}
-		
+		template <typename T>
+		const typename std::enable_if<std::is_floating_point<T>::value, T>::type get()
+		{
+			if (type == kFloat)
+			{
+				T value;
+				if (lexical_encoding)
+					value = (T)u_.d_value;
+				else
+					value = negate ? -*reinterpret_cast<T*>(&u_.i_value) : *reinterpret_cast<T*>(&u_.i_value);
+				return value;
+			}
+			else throw type_error("Type Conversion Error");
+		}
 		
 		Literal(Literal && l);
 
@@ -77,9 +90,16 @@ namespace openddl
 	private:
 		Literal();
 		type_t type;
-		union _storage { std::string * s_value; bool b_value; uint64_t i_value; };
+		union _storage 
+		{ 
+			std::string * s_value; 
+			bool b_value; 
+			uint64_t i_value; 
+			double d_value;
+		};
 		_storage u_;
 		bool negate;
+		bool lexical_encoding;
 	public:
 		//Construct Literal from token, providing type hint to enforce on token
 		static Literal construct(const Token & token, type_t type_hint);

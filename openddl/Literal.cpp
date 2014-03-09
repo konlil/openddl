@@ -102,7 +102,7 @@ openddl::Literal::~Literal()
 	
 }
 
-openddl::Literal::Literal(Literal && l) : type(l.type), negate(l.negate)
+openddl::Literal::Literal(Literal && l) : type(l.type), negate(l.negate), lexical_encoding(l.lexical_encoding)
 {
 	switch (l.type)
 	{
@@ -112,6 +112,8 @@ openddl::Literal::Literal(Literal && l) : type(l.type), negate(l.negate)
 		u_.b_value = l.u_.b_value; break;
 	case kInteger:
 		u_.i_value = l.u_.i_value; break;
+	case kFloat:
+		u_.d_value = l.u_.d_value; break;
 	}
 }
 openddl::Literal openddl::Literal::construct(const Token & token, type_t type_hint)
@@ -152,7 +154,21 @@ openddl::Literal openddl::Literal::construct(const Token & token, type_t type_hi
 	case kFloat:
 		if (token.literal_type & (Token::kBinaryLiteral | Token::kHexLiteral | Token::kDecimalLiteral | Token::kFloatLiteral))
 		{
-			
+			l.type = type_hint;
+			switch (token.literal_type)
+			{
+			case Token::kBinaryLiteral:
+			case Token::kHexLiteral:
+				l.u_.i_value = decode_integer(token.literal_type, token.payload, l.negate);
+				l.lexical_encoding = false;
+				break;
+			case Token::kDecimalLiteral:
+			case Token::kFloatLiteral:
+				l.lexical_encoding = true;
+				l.u_.d_value = std::stod(token.payload);
+				break;
+
+			}
 		}
 		else
 			type_error("Encoding mismatch constructing float literal");

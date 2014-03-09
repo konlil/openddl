@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
 	try{
 	std::string out;
 	std::string input =
-		"\"Hello\" true -1000 0x22 0b11 'ABCD'";
+		"\"Hello\" true -1000 0x22 0b11 'ABCD' 0x3f800000 0x7ff0000000000000";
 
 	std::vector<openddl::Token> tokens;
 	std::vector<openddl::TokenError> errors;
@@ -66,6 +66,8 @@ int main(int argc, char * argv[])
 		std::cout << openddl::Literal::construct(tokens[3], openddl::Literal::kInteger).get<short>() << std::endl;
 		std::cout << openddl::Literal::construct(tokens[4], openddl::Literal::kInteger).get<unsigned short>() << std::endl;
 		std::cout << openddl::Literal::construct(tokens[5], openddl::Literal::kInteger).get<int>() << std::endl;
+		std::cout << openddl::Literal::construct(tokens[6], openddl::Literal::kFloat).get<float>() << std::endl;
+		std::cout << openddl::Literal::construct(tokens[7], openddl::Literal::kFloat).get<double>() << std::endl;
 
 	}
 	catch (std::runtime_error & e)
