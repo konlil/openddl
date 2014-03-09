@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
 	try{
 	std::string out;
 	std::string input =
-		"\"Hello\" true";
+		"\"Hello\" true -1000 0x22 0b11 'ABCD'";
 
 	std::vector<openddl::Token> tokens;
 	std::vector<openddl::TokenError> errors;
@@ -60,9 +60,12 @@ int main(int argc, char * argv[])
 	
 	std::cout << "=================================================================" << std::endl;
 	
-		int position = 0;
-		std::cout << openddl::Literal::construct(tokens, position, openddl::Literal::kString).get<std::string>() << std::endl;
-		std::cout << openddl::Literal::construct(tokens, position, openddl::Literal::kBoolean).get<bool>() << std::endl;
+		std::cout << openddl::Literal::construct(tokens[0],openddl::Literal::kString).get<std::string>() << std::endl;
+		std::cout << openddl::Literal::construct(tokens[1], openddl::Literal::kBoolean).get<bool>() << std::endl;
+		std::cout << openddl::Literal::construct(tokens[2], openddl::Literal::kInteger).get<short>() << std::endl;
+		std::cout << openddl::Literal::construct(tokens[3], openddl::Literal::kInteger).get<short>() << std::endl;
+		std::cout << openddl::Literal::construct(tokens[4], openddl::Literal::kInteger).get<unsigned short>() << std::endl;
+		std::cout << openddl::Literal::construct(tokens[5], openddl::Literal::kInteger).get<int>() << std::endl;
 
 	}
 	catch (std::runtime_error & e)
