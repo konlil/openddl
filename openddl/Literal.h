@@ -78,7 +78,14 @@ namespace openddl
 					value = (T)u_.d_value;
 				else
 					value = negate ? -*reinterpret_cast<T*>(&u_.i_value) : *reinterpret_cast<T*>(&u_.i_value);
-				return value;
+
+				if (value <= std::numeric_limits<T>::max() || value == std::numeric_limits<T>::infinity())
+					if (value >= std::numeric_limits<T>::min() || value == -std::numeric_limits<T>::infinity())
+						return value;
+					else
+						throw type_error("Underflow");
+				else
+					throw type_error("Overflow");
 			}
 			else throw type_error("Type Conversion Error");
 		}
