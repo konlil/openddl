@@ -12,7 +12,8 @@ namespace openddl
 	{
 		enum token_t
 		{
-
+			kLeftSquareBracket,
+			kRightSquareBracket,
 			kComma,
 			kLeftBrace,
 			kRightBrace,	

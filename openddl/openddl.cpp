@@ -4,6 +4,7 @@
 //================================================================================================================
 
 #include "Lexer.h"
+#include "Literal.h"
 #include <string>
 #include <iostream>
 
@@ -12,8 +13,10 @@ const char * token_name(openddl::Token & t)
 	using openddl::Token;
 	switch (t.token_type)
 	{
-	case Token::kArrayType:
-		return "Array Data Type";
+	case Token::kLeftSquareBracket:
+		return "Left Square Bracket";
+	case Token::kRightSquareBracket:
+		return "Right Square Bracket";
 	case Token::kLiteral:
 		return "Literal";
 	case Token::kIdentifier:
@@ -35,16 +38,16 @@ const char * token_name(openddl::Token & t)
 
 int main(int argc, char * argv[])
 {
+	try{
 	std::string out;
-	std::string input = 
-		"float[3]\n"
-		"{\n"
-		"	1,2,3,4,5\n"
-		" }";
+	std::string input =
+		"\"Hello\" true";
+
 	std::vector<openddl::Token> tokens;
 	std::vector<openddl::TokenError> errors;
 	bool success = openddl::lex(input, tokens, errors);
 
+	std::cout << std::boolalpha;
 	std::cout << "=================================================================" << std::endl;
 	if (errors.size())
 		for (auto & error : errors)
@@ -56,6 +59,16 @@ int main(int argc, char * argv[])
 	}
 	
 	std::cout << "=================================================================" << std::endl;
+	
+		int position = 0;
+		std::cout << openddl::Literal::construct(tokens, position, openddl::Literal::kString).get<std::string>() << std::endl;
+		std::cout << openddl::Literal::construct(tokens, position, openddl::Literal::kBoolean).get<bool>() << std::endl;
+
+	}
+	catch (std::runtime_error & e)
+	{
+		std::cout << e.what() << std::endl;
+	}
 	
 	return 0;
 }

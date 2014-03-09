@@ -20,6 +20,8 @@
   	machine Lexer;
 	write data;
 
+	action count_character { context.count_character();}
+	action reset_count { context.reset_count(); }
 	action invalid_character_error {
 		error("lex.invalid_character"); 
 		fgoto main;
@@ -35,7 +37,7 @@
 	recover_string_literal := ^'"'+ '"' @invalid_character_error @/unterminated_string_literal;
 
 	newline = '\n' 
-		%{ context.line++; context.line_start = p;};
+		%{ context.new_line(p);};
 	escape_char = '\\' (["'\?\\abfnrtv]|'x' xdigit{2}) ;
 	utf8 = (0x20..0x21) | (0x23..0x5B) | (0x5D..0x7E) |
 		0xC2 (0xA0..0xBF) | (0xC3..0xDF) (0x80..0xBF) |
@@ -52,7 +54,7 @@
 	hex_literal = [+\-]? '0' [xX] xdigit+;
 	float_literal = [+\-]? (digit* '.' digit+ ([eE] [+\-]? digit+)? | digit+ ([eE] [+\-]? digit+)?);
 	character_literal = "'" 
-							((0x20..0x26|0x28..0x5B|0x5D..0x7E) %{context.characters_consumed++;}|escape_char %{context.characters_consumed++;})+ >{context.characters_consumed = 0;}
+							((0x20..0x26|0x28..0x5B|0x5D..0x7E) %count_character|escape_char %count_character)+ >reset_count
 						:>> "'";
 
 	bool_literal = 'true' | 'false';
@@ -75,7 +77,7 @@
 		binary_literal		=>	{ literal(openddl::Token::kBinaryLiteral);};
 		float_literal		=>	{ literal(openddl::Token::kFloatLiteral);};
 		#Fallback rule to catch improperly formatted numeric literals
-		(decimal_literal|hex_literal|binary_literal|float_literal) ^(0x01..0x20|[,{}])+ 
+		(decimal_literal|hex_literal|binary_literal|float_literal) ^(0x01..0x20|[},\]])+ 
 							=> { error("lex.invalid_literal");};
 
 		#Boolean Literal
@@ -102,7 +104,7 @@
 		'string'			=>	{ datatype(openddl::Token::kString);};
 		'type'				=>  { datatype(openddl::Token::kType);};
 		
-		'[' integer_literal ']' =>	{ arraytype();};
+	
 
 		# String Literals
 		'"' (utf8|escape_char|'\\u' xdigit{4}|'\\U' xdigit{6})* :>> '"' 
@@ -111,7 +113,7 @@
 		'"'					=> { fgoto recover_string_literal;};
 
 		# Character Literal
-		character_literal	=> { if(context.characters_consumed > 7) error("lex.character_length_error"); else literal(openddl::Token::kCharacterLiteral);}; 
+		character_literal	=> { if(context.get_character_count() > 7) error("lex.character_length_error"); else literal(openddl::Token::kCharacterLiteral);}; 
 		# Fallback path for catching errors
 		"'"					=> { fgoto recover_character_literal;};
 
@@ -123,6 +125,8 @@
 		',' =>						{ token(openddl::Token::kComma);};
 		'{' =>						{ token(openddl::Token::kLeftBrace);};
 		'}' =>						{ token(openddl::Token::kRightBrace);};
+		'['	=>						{ token(openddl::Token::kLeftSquareBracket);};
+		']'	=>						{ token(openddl::Token::kRightSquareBracket);};
 		'=' =>						{ token(openddl::Token::kEquals);};
 		'*/' =>						{error("lex.trailing_close_comment");};
 		# Whitespace
