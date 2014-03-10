@@ -3,13 +3,13 @@
 // Licensed under MIT License
 //================================================================================================================
 #pragma once
-#include "Lexer.h"
 #include <cstdint>
 #include <type_traits>
+#include <stdexcept>
 
 namespace openddl
 {
-
+	struct Token;
 	struct Literal
 	{
 		using type_error = std::runtime_error;
@@ -108,8 +108,9 @@ namespace openddl
 		bool negate;
 		bool lexical_encoding;
 	public:
-		//Construct Literal from token, providing type hint to enforce on token
+		//Construct Numeric Literal from token, providing type hint to enforce on token
 		static Literal construct(const Token & token, type_t type_hint);
+
 	};
 }
 

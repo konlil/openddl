@@ -4,6 +4,8 @@
 //================================================================================================================
 
 #include "Literal.h"
+#include <string>
+#include "Lexer.h"
 
 char consume_character(const std::string & in, int & position)
 {

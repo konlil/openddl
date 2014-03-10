@@ -34,6 +34,11 @@
 	action unterminated_string_literal{
 		error("lex.unterminated_string_literal");
 	}
+	action unterminated_block_comment{
+		error("lex.unterminated_block_comment"); 
+		//Skip forward to end of file
+		fexec(pe); fbreak;
+	}
 	recover_string_literal := ^'"'+ '"' @invalid_character_error @/unterminated_string_literal;
 
 	newline = '\n' 
@@ -47,7 +52,7 @@
 		(0xF0..0xF3) (0x90..0xBF) (0x80..0xBF) (0x80..0xBF) |
 		0xF4 (0x90..0xBF) (0x80..0xBF) (0x80..0xBF);
 
-	block_comment = '/*' ( any-'\n' | newline  | '/*' @{error("lex.nested_block_comment");} )*  :>> '*/';
+	block_comment = '/*' ( any-'\n' | newline  | '/*' @{error("lex.nested_block_comment");} )*  :>> '*/' @!unterminated_block_comment;
 	
 	decimal_literal = [+\-]? digit+;
 	binary_literal = [+\-]? '0' [bB] [01]+;
@@ -67,7 +72,7 @@
 				'float' | 'double' | 'string' | 'ref' | 'type';
 
 
-	name = (alpha | '_' ) (alnum | '_')* - data_type;
+	name = (alpha | '_' ) (alnum | '_')* - data_type -'null';
 	identifier = [$%] name;
 	main := 
 	|*
@@ -161,4 +166,6 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 	
 	return (p==pe);
 }
+
+bool openddl::has_intervening_whitespace(const Token & a, const Token & b) { return (a.range_start + a.range_length) != b.range_start; }
 

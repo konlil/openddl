@@ -83,6 +83,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="catch.hpp" />
     <ClInclude Include="LexerContext.h" />
     <ClInclude Include="Literal.h" />
     <ClInclude Include="Parser.h" />
