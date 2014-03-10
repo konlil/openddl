@@ -67,7 +67,7 @@ namespace openddl
 		unsigned int range_length;
 
 	};
-	bool has_intervening_whitespace(const Token & a, const Token & b);
+	inline bool has_intervening_whitespace(const Token & a, const Token & b) { return (a.range_start + a.range_length) != b.range_start; }
 	struct TokenError
 	{
 		

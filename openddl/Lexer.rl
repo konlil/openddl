@@ -166,7 +166,5 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 	%% write exec;
 	
 	return (p==pe);
-}
-
-bool openddl::has_intervening_whitespace(const Token & a, const Token & b) { return (a.range_start + a.range_length) != b.range_start; }
+} 
 
