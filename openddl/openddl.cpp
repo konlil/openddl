@@ -47,7 +47,6 @@ TEST_CASE("Comments", "[lexer]"){
 		tokens.clear(); errors.clear();
 	}
 }
-
 TEST_CASE("Structural Tokens", "[lexer]"){
 	using openddl::Token;
 	using openddl::TokenError;
@@ -111,7 +110,6 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 		tokens.clear(); errors.clear();
 	}
 }
-
 TEST_CASE("Literal Encodings","[lexer]"){
 	using openddl::Token;
 	using openddl::TokenError;
@@ -119,21 +117,49 @@ TEST_CASE("Literal Encodings","[lexer]"){
 	std::vector<Token> tokens;
 	std::vector<TokenError> errors;
 	SECTION("Binary Literals"){
+		REQUIRE(lex("0b11 +0B11 -0B00", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(tokens[0].literal_type == Token::kBinaryLiteral);
+		CHECK(tokens[1].literal_type == Token::kBinaryLiteral);
+		CHECK(tokens[2].literal_type == Token::kBinaryLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Hex Literals"){
+		REQUIRE(lex("0x00 +0x99 -0xFF", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(tokens[0].literal_type == Token::kHexLiteral);
+		CHECK(tokens[1].literal_type == Token::kHexLiteral);
+		CHECK(tokens[2].literal_type == Token::kHexLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Character Literals"){
+		REQUIRE(lex("'a' '\\x99' '\\t'", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(tokens[0].literal_type == Token::kCharacterLiteral);
+		CHECK(tokens[1].literal_type == Token::kCharacterLiteral);
+		CHECK(tokens[2].literal_type == Token::kCharacterLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Decimal Literals"){
+		REQUIRE(lex("99 -1000 +1337", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(tokens[0].literal_type == Token::kDecimalLiteral);
+		CHECK(tokens[1].literal_type == Token::kDecimalLiteral);
+		CHECK(tokens[2].literal_type == Token::kDecimalLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Float Literals"){
+		REQUIRE(lex("99.0 -99e-10 +.99E+22", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(tokens[0].literal_type == Token::kFloatLiteral);
+		CHECK(tokens[1].literal_type == Token::kFloatLiteral);
+		CHECK(tokens[2].literal_type == Token::kFloatLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("String Literals"){
+		REQUIRE(lex("\" abcd \" \"\\U123456 \\u9999 \"", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(tokens[0].literal_type == Token::kStringLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Boolean Literals"){
@@ -157,5 +183,19 @@ TEST_CASE("Literal Encodings","[lexer]"){
 		CHECK(errors[4].payload == "'AYC\\c'");
 		CHECK(errors[5].payload == "\" \x5C \"");
 		tokens.clear(); errors.clear();
+		
 	}
+	SECTION("Handling Unterminated strings/characters"){
+		REQUIRE(lex("\" partial string", tokens, errors));
+		REQUIRE(errors.size() == 1);
+		tokens.clear(); errors.clear();
+		REQUIRE(lex("' part", tokens, errors));
+		REQUIRE(errors.size() == 1);
+		tokens.clear(); errors.clear();
+
+	}
+}
+
+TEST_CASE("Literal", "[literal]"){
+
 }

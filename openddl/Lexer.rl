@@ -27,12 +27,12 @@
 		fgoto main;
 	}
 	action unterminated_character_literal{
-		error("lex.unterminated_character_literal");
+		context.lex_error("lex.unterminated_character_literal",te-1,p+1);
 	}
 	recover_character_literal := ^"'"+ "'" >{ char_error = p;} @invalid_character_error @/unterminated_character_literal;
 
 	action unterminated_string_literal{
-		error("lex.unterminated_string_literal");
+		context.lex_error("lex.unterminated_string_literal",te-1,p+1);
 	}
 	action unterminated_block_comment{
 		error("lex.unterminated_block_comment"); 
