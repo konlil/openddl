@@ -47,7 +47,7 @@ TEST_CASE("Comments", "[lexer]"){
 		tokens.clear(); errors.clear();
 	}
 }
-/*
+
 TEST_CASE("Structural Tokens", "[lexer]"){
 	using openddl::Token;
 	using openddl::TokenError;
@@ -111,7 +111,7 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 		tokens.clear(); errors.clear();
 	}
 }
-*/
+
 TEST_CASE("Literal Encodings","[lexer]"){
 	using openddl::Token;
 	using openddl::TokenError;
