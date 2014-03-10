@@ -197,5 +197,53 @@ TEST_CASE("Literal Encodings","[lexer]"){
 }
 
 TEST_CASE("Literal", "[literal]"){
+	using openddl::Literal;
+	std::vector<openddl::Token> tokens;
+	std::vector<openddl::TokenError> errors;
+	SECTION("Integer Conversion"){
+		
+		REQUIRE(lex("-1094861636 0x41424344 +0b01000001010000100100001101000100 'ABCD'", tokens, errors));
+		REQUIRE(errors.size() == 0);
 
+		//Overflow errors
+		CHECK_THROWS(Literal::construct(tokens[0], Literal::kInteger).get<unsigned int>());
+		CHECK_THROWS(Literal::construct(tokens[0], Literal::kInteger).get<short>());
+		CHECK_THROWS(Literal::construct(tokens[0], Literal::kInteger).get<char>());
+
+		CHECK(Literal::construct(tokens[0], Literal::kInteger).get<int>() == -'ABCD');
+		CHECK(Literal::construct(tokens[1], Literal::kInteger).get<unsigned int>() == 'ABCD');
+		CHECK(Literal::construct(tokens[2], Literal::kInteger).get<uint64_t>() == 'ABCD');
+		CHECK(Literal::construct(tokens[3], Literal::kInteger).get<int>() == 'ABCD');
+		tokens.clear(); errors.clear();
+	}
+	SECTION("Float Literal"){
+		
+		REQUIRE(lex("99 0x3f800000 -30.0 'ABCD'", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(Literal::construct(tokens[0], Literal::kFloat).get<float>() == 99.0f);
+		CHECK(Literal::construct(tokens[0], Literal::kFloat).get<double>() == 99.0);
+		CHECK(Literal::construct(tokens[1], Literal::kFloat).get<float>() == 1.0f);
+		CHECK(Literal::construct(tokens[1], Literal::kFloat).get<double>() == 5.26354424712e-315);
+		CHECK(Literal::construct(tokens[2], Literal::kFloat).get<float>() == -30.0f);
+		CHECK(Literal::construct(tokens[2], Literal::kFloat).get<double>() == -30.0);
+		CHECK_THROWS(Literal::construct(tokens[3], Literal::kFloat).get<double>());
+		tokens.clear(); errors.clear();
+	}
+	SECTION("Boolean Literal"){
+		REQUIRE(lex("true false null", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(Literal::construct(tokens[0], Literal::kBoolean).get<bool>() == true);
+		CHECK(Literal::construct(tokens[1], Literal::kBoolean).get<bool>() == false);
+		CHECK_THROWS(Literal::construct(tokens[2], Literal::kBoolean).get<bool>());
+		tokens.clear(); errors.clear();
+	}
+	SECTION("String Literal"){
+		REQUIRE(lex("\"Hello \" \"World\" null", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(Literal::construct(tokens[0], Literal::kString).get<std::string>() == "\"Hello World\"");
+		CHECK_THROWS(Literal::construct(tokens[1], Literal::kString).get<std::string>());
+		tokens.clear(); errors.clear();
+	}
+	
+	
 }
