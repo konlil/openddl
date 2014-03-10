@@ -23,13 +23,13 @@
 	action count_character { context.count_character();}
 	action reset_count { context.reset_count(); }
 	action invalid_character_error {
-		error("lex.invalid_character"); 
+		context.lex_error("lex.invalid_character",te-1,p+1); 
 		fgoto main;
 	}
 	action unterminated_character_literal{
 		error("lex.unterminated_character_literal");
 	}
-	recover_character_literal := ^"'"+ "'" @invalid_character_error @/unterminated_character_literal;
+	recover_character_literal := ^"'"+ "'" >{ char_error = p;} @invalid_character_error @/unterminated_character_literal;
 
 	action unterminated_string_literal{
 		error("lex.unterminated_string_literal");
@@ -39,7 +39,7 @@
 		//Skip forward to end of file
 		fexec(pe); fbreak;
 	}
-	recover_string_literal := ^'"'+ '"' @invalid_character_error @/unterminated_string_literal;
+	recover_string_literal := ^'"'+ '"' >{ char_error = p;} @invalid_character_error @/unterminated_string_literal;
 
 	newline = '\n' 
 		%{ context.new_line(p);};
@@ -149,7 +149,8 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 	Lexer::Context context(input,tokens,errors);
 	
 	char const *p = input.c_str();
-	char const *char_error = 0;
+	//Tracks the character which caused the character error within string or character literal
+	const char *char_error = 0;
 
 	//End
 	char const *pe = p + input.length();

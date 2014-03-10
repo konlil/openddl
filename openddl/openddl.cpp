@@ -47,8 +47,16 @@ TEST_CASE("Comments", "[lexer]"){
 		tokens.clear(); errors.clear();
 	}
 }
+/*
 TEST_CASE("Structural Tokens", "[lexer]"){
-	
+	using openddl::Token;
+	using openddl::TokenError;
+	using openddl::lex;
+	std::vector<Token> tokens;
+	std::vector<TokenError> errors;
+	REQUIRE(lex("[ ] { , }", tokens, errors));
+	REQUIRE(errors.size() == 0);
+	CHECK(tokens.size() == 5);
 }
 TEST_CASE("Textual Tokens", "[lexer]"){
 	using openddl::Token;
@@ -76,7 +84,13 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Array Types"){
-
+		REQUIRE(lex("float[3]", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(tokens[0].token_type == Token::kDataType);
+		CHECK(tokens[1].token_type == Token::kLeftSquareBracket);
+		CHECK(tokens[2].token_type == Token::kLiteral);
+		CHECK(tokens[3].token_type == Token::kRightSquareBracket);
+		tokens.clear(); errors.clear();
 	}
 	SECTION("Names"){
 		REQUIRE(lex("hello world null float", tokens, errors));
@@ -97,12 +111,51 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 		tokens.clear(); errors.clear();
 	}
 }
+*/
 TEST_CASE("Literal Encodings","[lexer]"){
-	SECTION("Binary Literals"){}
-	SECTION("Hex Literals"){}
-	SECTION("Character Literals"){}
-	SECTION("Decimal Literals"){}
-	SECTION("Float Literals"){}
-	SECTION("String Literals"){}
-	SECTION("Boolean Literals"){}
+	using openddl::Token;
+	using openddl::TokenError;
+	using openddl::lex;
+	std::vector<Token> tokens;
+	std::vector<TokenError> errors;
+	SECTION("Binary Literals"){
+		tokens.clear(); errors.clear();
+	}
+	SECTION("Hex Literals"){
+		tokens.clear(); errors.clear();
+	}
+	SECTION("Character Literals"){
+		tokens.clear(); errors.clear();
+	}
+	SECTION("Decimal Literals"){
+		tokens.clear(); errors.clear();
+	}
+	SECTION("Float Literals"){
+		tokens.clear(); errors.clear();
+	}
+	SECTION("String Literals"){
+		tokens.clear(); errors.clear();
+	}
+	SECTION("Boolean Literals"){
+		REQUIRE(lex("true false TRUE FALSE null yes no", tokens, errors));
+		REQUIRE(errors.size() == 0);
+		CHECK(tokens[0].literal_type == Token::kBooleanLiteral);
+		CHECK(tokens[1].literal_type == Token::kBooleanLiteral);
+		CHECK(tokens[2].literal_type != Token::kBooleanLiteral);
+		CHECK(tokens[3].literal_type != Token::kBooleanLiteral);
+		CHECK(tokens[4].literal_type != Token::kBooleanLiteral);
+		CHECK(tokens[5].literal_type != Token::kBooleanLiteral);
+		CHECK(tokens[6].literal_type != Token::kBooleanLiteral);
+		tokens.clear(); errors.clear();
+	}
+	SECTION("Handling Error Literals"){
+		REQUIRE(lex("0b1222 0xAZX 99AT 30.0Y 'AYC\\c' \" \x5C \"", tokens, errors));
+		CHECK(errors[0].payload == "0b1222");
+		CHECK(errors[1].payload == "0xAZX");
+		CHECK(errors[2].payload == "99AT");
+		CHECK(errors[3].payload == "30.0Y");
+		CHECK(errors[4].payload == "'AYC\\c'");
+		CHECK(errors[5].payload == "\" \x5C \"");
+		tokens.clear(); errors.clear();
+	}
 }

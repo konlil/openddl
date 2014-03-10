@@ -21,24 +21,25 @@
 
 #line 20 ".\\Lexer.cpp"
 static const char _Lexer_actions[] = {
-	0, 1, 0, 1, 1, 1, 2, 1, 
-	3, 1, 4, 1, 6, 1, 7, 1, 
-	8, 1, 9, 1, 10, 1, 32, 1, 
-	34, 1, 35, 1, 36, 1, 37, 1, 
-	38, 1, 39, 1, 40, 1, 41, 1, 
-	42, 1, 43, 1, 44, 1, 45, 1, 
-	46, 1, 47, 1, 48, 1, 49, 1, 
-	50, 1, 51, 1, 53, 1, 54, 1, 
-	55, 1, 56, 1, 57, 1, 58, 2, 
-	0, 33, 2, 5, 57, 2, 6, 52, 
-	2, 10, 11, 2, 10, 12, 2, 10, 
-	13, 2, 10, 14, 2, 10, 15, 2, 
-	10, 16, 2, 10, 17, 2, 10, 18, 
-	2, 10, 19, 2, 10, 20, 2, 10, 
-	21, 2, 10, 22, 2, 10, 23, 2, 
-	10, 24, 2, 10, 25, 2, 10, 26, 
-	2, 10, 27, 2, 10, 28, 2, 10, 
-	29, 2, 10, 30, 2, 10, 31
+	0, 1, 0, 1, 1, 1, 3, 1, 
+	5, 1, 8, 1, 9, 1, 10, 1, 
+	11, 1, 12, 1, 34, 1, 36, 1, 
+	37, 1, 38, 1, 39, 1, 40, 1, 
+	41, 1, 42, 1, 43, 1, 44, 1, 
+	45, 1, 46, 1, 47, 1, 48, 1, 
+	49, 1, 50, 1, 51, 1, 52, 1, 
+	53, 1, 55, 1, 56, 1, 57, 1, 
+	58, 1, 59, 1, 60, 2, 0, 35, 
+	2, 4, 2, 2, 6, 59, 2, 7, 
+	2, 2, 8, 54, 2, 12, 13, 2, 
+	12, 14, 2, 12, 15, 2, 12, 16, 
+	2, 12, 17, 2, 12, 18, 2, 12, 
+	19, 2, 12, 20, 2, 12, 21, 2, 
+	12, 22, 2, 12, 23, 2, 12, 24, 
+	2, 12, 25, 2, 12, 26, 2, 12, 
+	27, 2, 12, 28, 2, 12, 29, 2, 
+	12, 30, 2, 12, 31, 2, 12, 32, 
+	2, 12, 33
 };
 
 static const short _Lexer_key_offsets[] = {
@@ -390,38 +391,38 @@ static const unsigned char _Lexer_trans_targs[] = {
 };
 
 static const unsigned char _Lexer_trans_actions[] = {
-	63, 0, 0, 0, 0, 0, 0, 0, 
-	0, 21, 0, 0, 0, 0, 0, 0, 
-	0, 0, 61, 0, 65, 1, 71, 1, 
-	0, 0, 0, 67, 0, 74, 0, 0, 
-	0, 0, 11, 11, 11, 11, 23, 13, 
-	0, 0, 5, 0, 5, 41, 39, 0, 
-	19, 0, 19, 0, 19, 25, 0, 19, 
-	0, 0, 35, 95, 31, 33, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 27, 
-	29, 77, 53, 59, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 51, 0, 19, 
-	0, 0, 0, 0, 19, 0, 0, 19, 
-	0, 19, 19, 19, 19, 0, 19, 0, 
-	0, 0, 19, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 55, 3, 3, 37, 
-	0, 45, 0, 0, 47, 89, 86, 69, 
-	43, 0, 89, 89, 83, 80, 0, 57, 
-	49, 0, 0, 101, 0, 0, 0, 0, 
-	131, 0, 0, 0, 0, 92, 0, 0, 
-	128, 0, 0, 0, 0, 0, 104, 107, 
-	110, 113, 0, 0, 98, 0, 134, 0, 
-	0, 0, 0, 137, 0, 0, 0, 140, 
+	61, 0, 0, 0, 0, 0, 0, 0, 
+	0, 19, 0, 0, 0, 0, 0, 0, 
+	0, 0, 59, 0, 63, 1, 69, 1, 
+	0, 0, 0, 65, 0, 75, 0, 0, 
+	0, 0, 9, 9, 9, 9, 21, 11, 
+	0, 0, 72, 0, 78, 39, 37, 0, 
+	17, 0, 17, 0, 17, 23, 0, 17, 
+	0, 0, 33, 99, 29, 31, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 25, 
+	27, 81, 51, 57, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 49, 0, 17, 
+	0, 0, 0, 0, 17, 0, 0, 17, 
+	0, 17, 17, 17, 17, 0, 17, 0, 
+	0, 0, 17, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 53, 3, 3, 35, 
+	0, 43, 0, 0, 45, 93, 90, 67, 
+	41, 0, 93, 93, 87, 84, 0, 55, 
+	47, 0, 0, 105, 0, 0, 0, 0, 
+	135, 0, 0, 0, 0, 96, 0, 0, 
+	132, 0, 0, 0, 0, 0, 108, 111, 
+	114, 117, 0, 0, 102, 0, 138, 0, 
+	0, 0, 0, 141, 0, 0, 0, 144, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 116, 119, 
-	122, 125
+	0, 0, 0, 0, 0, 0, 120, 123, 
+	126, 129
 };
 
 static const unsigned char _Lexer_to_state_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 15, 0, 15, 0, 15, 
+	0, 0, 0, 13, 0, 13, 0, 13, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
@@ -442,7 +443,7 @@ static const unsigned char _Lexer_from_state_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 17, 
+	0, 0, 0, 0, 0, 0, 0, 15, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
@@ -463,7 +464,7 @@ static const unsigned char _Lexer_eof_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 7, 0, 9, 0, 
+	0, 0, 0, 0, 5, 0, 7, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
@@ -519,7 +520,8 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 	Lexer::Context context(input,tokens,errors);
 	
 	char const *p = input.c_str();
-	char const *char_error = 0;
+	//Tracks the character which caused the character error within string or character literal
+	const char *char_error = 0;
 
 	//End
 	char const *pe = p + input.length();
@@ -532,7 +534,7 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 	int done = 0;
 
 	
-#line 529 ".\\Lexer.cpp"
+#line 531 ".\\Lexer.cpp"
 	{
 	cs = Lexer_start;
 	ts = 0;
@@ -540,9 +542,9 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 	act = 0;
 	}
 
-#line 165 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 166 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	
-#line 535 ".\\Lexer.cpp"
+#line 537 ".\\Lexer.cpp"
 	{
 	int _klen;
 	unsigned int _trans;
@@ -559,11 +561,11 @@ _resume:
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 ) {
 		switch ( *_acts++ ) {
-	case 9:
+	case 11:
 #line 1 "NONE"
 	{ts = p;}
 	break;
-#line 554 ".\\Lexer.cpp"
+#line 556 ".\\Lexer.cpp"
 		}
 	}
 
@@ -640,11 +642,15 @@ _eof_trans:
 	case 2:
 #line 25 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{
-		error("lex.invalid_character"); 
+		context.lex_error("lex.invalid_character",te-1,p+1); 
 		{cs = 31; goto _again;}
 	}
 	break;
-	case 5:
+	case 4:
+#line 32 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+	{ char_error = p;}
+	break;
+	case 6:
 #line 37 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{
 		error("lex.unterminated_block_comment"); 
@@ -652,207 +658,211 @@ _eof_trans:
 		{p = (((pe)))-1;} {p++; goto _out; }
 	}
 	break;
-	case 6:
+	case 7:
+#line 42 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+	{ char_error = p;}
+	break;
+	case 8:
 #line 45 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{ context.new_line(p);}
 	break;
-	case 7:
+	case 9:
 #line 55 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{error("lex.nested_block_comment");}
 	break;
-	case 10:
+	case 12:
 #line 1 "NONE"
 	{te = p+1;}
 	break;
-	case 11:
+	case 13:
 #line 81 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 2;}
 	break;
-	case 12:
+	case 14:
 #line 82 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 3;}
 	break;
-	case 13:
+	case 15:
 #line 83 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 4;}
 	break;
-	case 14:
+	case 16:
 #line 86 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 5;}
 	break;
-	case 15:
+	case 17:
 #line 89 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 6;}
 	break;
-	case 16:
+	case 18:
 #line 92 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 7;}
 	break;
-	case 17:
+	case 19:
 #line 94 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 9;}
 	break;
-	case 18:
+	case 20:
 #line 97 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 10;}
 	break;
-	case 19:
+	case 21:
 #line 98 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 11;}
 	break;
-	case 20:
+	case 22:
 #line 99 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 12;}
 	break;
-	case 21:
+	case 23:
 #line 100 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 13;}
 	break;
-	case 22:
+	case 24:
 #line 101 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 14;}
 	break;
-	case 23:
+	case 25:
 #line 102 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 15;}
 	break;
-	case 24:
+	case 26:
 #line 103 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 16;}
 	break;
-	case 25:
+	case 27:
 #line 104 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 17;}
 	break;
-	case 26:
+	case 28:
 #line 105 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 18;}
 	break;
-	case 27:
+	case 29:
 #line 106 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 19;}
 	break;
-	case 28:
+	case 30:
 #line 107 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 20;}
 	break;
-	case 29:
+	case 31:
 #line 108 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 21;}
 	break;
-	case 30:
+	case 32:
 #line 109 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 22;}
 	break;
-	case 31:
+	case 33:
 #line 110 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{act = 23;}
 	break;
-	case 32:
+	case 34:
 #line 116 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ literal(openddl::Token::kStringLiteral);}}
 	break;
-	case 33:
+	case 35:
 #line 121 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ if(context.get_character_count() > 7) error("lex.character_length_error"); else literal(openddl::Token::kCharacterLiteral);}}
 	break;
-	case 34:
+	case 36:
 #line 127 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;}
 	break;
-	case 35:
+	case 37:
 #line 130 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ token(openddl::Token::kComma);}}
 	break;
-	case 36:
+	case 38:
 #line 131 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ token(openddl::Token::kLeftBrace);}}
 	break;
-	case 37:
+	case 39:
 #line 132 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ token(openddl::Token::kRightBrace);}}
 	break;
-	case 38:
+	case 40:
 #line 133 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ token(openddl::Token::kLeftSquareBracket);}}
 	break;
-	case 39:
+	case 41:
 #line 134 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ token(openddl::Token::kRightSquareBracket);}}
 	break;
-	case 40:
+	case 42:
 #line 135 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ token(openddl::Token::kEquals);}}
 	break;
-	case 41:
+	case 43:
 #line 136 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{error("lex.trailing_close_comment");}}
 	break;
-	case 42:
+	case 44:
 #line 138 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;}
 	break;
-	case 43:
+	case 45:
 #line 140 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p+1;{ error("lex.unrecognised_character");}}
 	break;
-	case 44:
+	case 46:
 #line 80 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ literal(openddl::Token::kDecimalLiteral); }}
 	break;
-	case 45:
+	case 47:
 #line 83 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ literal(openddl::Token::kFloatLiteral);}}
 	break;
-	case 46:
+	case 48:
 #line 86 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ error("lex.invalid_literal");}}
 	break;
-	case 47:
+	case 49:
 #line 92 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ token(openddl::Token::kName);}}
 	break;
-	case 48:
+	case 50:
 #line 93 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ token(openddl::Token::kIdentifier);}}
 	break;
-	case 49:
+	case 51:
 #line 118 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ {cs = 29; goto _again;}}}
 	break;
-	case 50:
+	case 52:
 #line 123 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ {cs = 27; goto _again;}}}
 	break;
-	case 51:
+	case 53:
 #line 126 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;}
 	break;
-	case 52:
+	case 54:
 #line 139 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;}
 	break;
-	case 53:
+	case 55:
 #line 140 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{te = p;p--;{ error("lex.unrecognised_character");}}
 	break;
-	case 54:
+	case 56:
 #line 93 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{{p = ((te))-1;}{ token(openddl::Token::kIdentifier);}}
 	break;
-	case 55:
+	case 57:
 #line 118 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{{p = ((te))-1;}{ {cs = 29; goto _again;}}}
 	break;
-	case 56:
+	case 58:
 #line 123 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{{p = ((te))-1;}{ {cs = 27; goto _again;}}}
 	break;
-	case 57:
+	case 59:
 #line 140 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{{p = ((te))-1;}{ error("lex.unrecognised_character");}}
 	break;
-	case 58:
+	case 60:
 #line 1 "NONE"
 	{	switch( act ) {
 	case 2:
@@ -921,7 +931,7 @@ _eof_trans:
 	}
 	}
 	break;
-#line 856 ".\\Lexer.cpp"
+#line 864 ".\\Lexer.cpp"
 		}
 	}
 
@@ -930,11 +940,11 @@ _again:
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 ) {
 		switch ( *_acts++ ) {
-	case 8:
+	case 10:
 #line 1 "NONE"
 	{ts = 0;}
 	break;
-#line 867 ".\\Lexer.cpp"
+#line 875 ".\\Lexer.cpp"
 		}
 	}
 
@@ -959,13 +969,13 @@ _again:
 		error("lex.unterminated_character_literal");
 	}
 	break;
-	case 4:
+	case 5:
 #line 34 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	{
 		error("lex.unterminated_string_literal");
 	}
 	break;
-#line 895 ".\\Lexer.cpp"
+#line 903 ".\\Lexer.cpp"
 		}
 	}
 	}
@@ -973,7 +983,7 @@ _again:
 	_out: {}
 	}
 
-#line 166 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
+#line 167 "C:/Users/Denis/Development/openddl/openddl/Lexer.rl"
 	
 	return (p==pe);
 }

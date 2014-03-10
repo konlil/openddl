@@ -17,7 +17,6 @@ namespace openddl
 			kComma,
 			kLeftBrace,
 			kRightBrace,	
-			kArrayType,
 			kDataType,
 			kIdentifier,
 			kName,
@@ -57,9 +56,8 @@ namespace openddl
 		};
 
 		token_t		token_type;			
-		type_t		data_type;			//Used only if token_type == kDataType || kArrayType
+		type_t		data_type;			//Used only if token_type == kDataType
 		literal_t	literal_type;		//Used only if token_type == kLiteral
-		unsigned int array_size;		//Set to value within braces if type array notation is used.
 
 		std::string payload;
 
