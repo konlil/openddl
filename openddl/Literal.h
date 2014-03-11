@@ -4,12 +4,37 @@
 //================================================================================================================
 #pragma once
 #include <cstdint>
+#include <vector>
+#include <string>
 #include <type_traits>
 #include <stdexcept>
 
 namespace openddl
 {
 	struct Token;
+	struct Reference
+	{
+		std::vector<std::string> path;
+	};
+	struct Type
+	{
+		enum enum_t {
+			kFloat,
+			kDouble,
+			kRef,
+			kUnsignedInt8,
+			kUnsignedInt16,
+			kUnsignedInt32,
+			kUnsignedInt64,
+			kInt8,
+			kInt16,
+			kInt32,
+			kInt64,
+			kBool,
+			kString,
+			kType
+		};
+	};
 	struct Literal
 	{
 		using type_error = std::runtime_error;
@@ -20,6 +45,7 @@ namespace openddl
 			kString,		
 			kBoolean,
 			kRef,
+			kType,
 			kNone
 		};
 
@@ -103,6 +129,8 @@ namespace openddl
 			bool b_value; 
 			uint64_t i_value; 
 			double d_value;
+			Reference * r_value;
+			Type::enum_t type;
 		};
 		_storage u_;
 		bool negate;

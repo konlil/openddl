@@ -1,3 +1,9 @@
+// Tests.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+
+
 //================================================================================================================
 // Copyright 2014 Denis Hilliard (armchaircommando@gmail.com)
 // Licensed under MIT License
@@ -5,8 +11,8 @@
 
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
-#include "Lexer.h"
-#include "Literal.h"
+#include "../openddl/Lexer.h"
+#include "../openddl/Literal.h"
 
 TEST_CASE("Comments", "[lexer]"){
 	using openddl::Token;
@@ -110,7 +116,7 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 		tokens.clear(); errors.clear();
 	}
 }
-TEST_CASE("Literal Encodings","[lexer]"){
+TEST_CASE("Literal Encodings", "[lexer]"){
 	using openddl::Token;
 	using openddl::TokenError;
 	using openddl::lex;
@@ -183,7 +189,7 @@ TEST_CASE("Literal Encodings","[lexer]"){
 		CHECK(errors[4].payload == "'AYC\\c'");
 		CHECK(errors[5].payload == "\" \x5C \"");
 		tokens.clear(); errors.clear();
-		
+
 	}
 	SECTION("Handling Unterminated strings/characters"){
 		REQUIRE(lex("\" partial string", tokens, errors));
@@ -201,7 +207,7 @@ TEST_CASE("Literal", "[literal]"){
 	std::vector<openddl::Token> tokens;
 	std::vector<openddl::TokenError> errors;
 	SECTION("Integer Conversion"){
-		
+
 		REQUIRE(lex("-1094861636 0x41424344 +0b01000001010000100100001101000100 'ABCD'", tokens, errors));
 		REQUIRE(errors.size() == 0);
 
@@ -217,7 +223,7 @@ TEST_CASE("Literal", "[literal]"){
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Float Literal"){
-		
+
 		REQUIRE(lex("99 0x3f800000 -30.0 'ABCD'", tokens, errors));
 		REQUIRE(errors.size() == 0);
 		CHECK(Literal::construct(tokens[0], Literal::kFloat).get<float>() == 99.0f);
@@ -244,6 +250,8 @@ TEST_CASE("Literal", "[literal]"){
 		CHECK_THROWS(Literal::construct(tokens[1], Literal::kString).get<std::string>());
 		tokens.clear(); errors.clear();
 	}
-	
-	
+
+
 }
+
+

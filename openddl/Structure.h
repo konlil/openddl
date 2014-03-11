@@ -1,8 +1,8 @@
 #pragma once
+#include <string>
 class Structure
 {
 public:
-	Structure();
-	~Structure();
+	std::string name;
 };
 

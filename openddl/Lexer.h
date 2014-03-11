@@ -21,6 +21,13 @@ namespace openddl
 			kName,
 			kEquals,
 			kNull,
+			kBooleanLiteral,
+			kFloatLiteral,
+			kHexLiteral,
+			kDecimalLiteral,
+			kBinaryLiteral,
+			kStringLiteral,
+			kCharacterLiteral,
 			kFloat,
 			kDouble,
 			kRef,
@@ -34,14 +41,7 @@ namespace openddl
 			kInt64,
 			kBool,
 			kString,
-			kType,
-			kBooleanLiteral,
-			kFloatLiteral,
-			kHexLiteral,
-			kDecimalLiteral,
-			kBinaryLiteral,
-			kStringLiteral,
-			kCharacterLiteral
+			kType
 		};
 
 		bool is_float_encoded() const;
