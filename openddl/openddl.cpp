@@ -66,28 +66,28 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 	SECTION("Types"){
 		REQUIRE(lex("bool float double int8 int16 int32 int64 unsigned_int8 unsigned_int16 unsigned_int32 unsigned_int64 string ref type", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].data_type == Token::kBool);
-		CHECK(tokens[1].data_type == Token::kFloat);
-		CHECK(tokens[2].data_type == Token::kDouble);
-		CHECK(tokens[3].data_type == Token::kInt8);
-		CHECK(tokens[4].data_type == Token::kInt16);
-		CHECK(tokens[5].data_type == Token::kInt32);
-		CHECK(tokens[6].data_type == Token::kInt64);
-		CHECK(tokens[7].data_type == Token::kUnsignedInt8);
-		CHECK(tokens[8].data_type == Token::kUnsignedInt16);
-		CHECK(tokens[9].data_type == Token::kUnsignedInt32);
-		CHECK(tokens[10].data_type == Token::kUnsignedInt64);
-		CHECK(tokens[11].data_type == Token::kString);
-		CHECK(tokens[12].data_type == Token::kRef);
-		CHECK(tokens[13].data_type == Token::kType);
+		CHECK(tokens[0].token_type == Token::kBool);
+		CHECK(tokens[1].token_type == Token::kFloat);
+		CHECK(tokens[2].token_type == Token::kDouble);
+		CHECK(tokens[3].token_type == Token::kInt8);
+		CHECK(tokens[4].token_type == Token::kInt16);
+		CHECK(tokens[5].token_type == Token::kInt32);
+		CHECK(tokens[6].token_type == Token::kInt64);
+		CHECK(tokens[7].token_type == Token::kUnsignedInt8);
+		CHECK(tokens[8].token_type == Token::kUnsignedInt16);
+		CHECK(tokens[9].token_type == Token::kUnsignedInt32);
+		CHECK(tokens[10].token_type == Token::kUnsignedInt64);
+		CHECK(tokens[11].token_type == Token::kString);
+		CHECK(tokens[12].token_type == Token::kRef);
+		CHECK(tokens[13].token_type == Token::kType);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Array Types"){
 		REQUIRE(lex("float[3]", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].token_type == Token::kDataType);
+		CHECK(tokens[0].is_data_type());
 		CHECK(tokens[1].token_type == Token::kLeftSquareBracket);
-		CHECK(tokens[2].token_type == Token::kLiteral);
+		CHECK(tokens[2].is_integer_encoded());
 		CHECK(tokens[3].token_type == Token::kRightSquareBracket);
 		tokens.clear(); errors.clear();
 	}
@@ -119,59 +119,59 @@ TEST_CASE("Literal Encodings","[lexer]"){
 	SECTION("Binary Literals"){
 		REQUIRE(lex("0b11 +0B11 -0B00", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].literal_type == Token::kBinaryLiteral);
-		CHECK(tokens[1].literal_type == Token::kBinaryLiteral);
-		CHECK(tokens[2].literal_type == Token::kBinaryLiteral);
+		CHECK(tokens[0].token_type == Token::kBinaryLiteral);
+		CHECK(tokens[1].token_type == Token::kBinaryLiteral);
+		CHECK(tokens[2].token_type == Token::kBinaryLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Hex Literals"){
 		REQUIRE(lex("0x00 +0x99 -0xFF", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].literal_type == Token::kHexLiteral);
-		CHECK(tokens[1].literal_type == Token::kHexLiteral);
-		CHECK(tokens[2].literal_type == Token::kHexLiteral);
+		CHECK(tokens[0].token_type == Token::kHexLiteral);
+		CHECK(tokens[1].token_type == Token::kHexLiteral);
+		CHECK(tokens[2].token_type == Token::kHexLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Character Literals"){
 		REQUIRE(lex("'a' '\\x99' '\\t'", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].literal_type == Token::kCharacterLiteral);
-		CHECK(tokens[1].literal_type == Token::kCharacterLiteral);
-		CHECK(tokens[2].literal_type == Token::kCharacterLiteral);
+		CHECK(tokens[0].token_type == Token::kCharacterLiteral);
+		CHECK(tokens[1].token_type == Token::kCharacterLiteral);
+		CHECK(tokens[2].token_type == Token::kCharacterLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Decimal Literals"){
 		REQUIRE(lex("99 -1000 +1337", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].literal_type == Token::kDecimalLiteral);
-		CHECK(tokens[1].literal_type == Token::kDecimalLiteral);
-		CHECK(tokens[2].literal_type == Token::kDecimalLiteral);
+		CHECK(tokens[0].token_type == Token::kDecimalLiteral);
+		CHECK(tokens[1].token_type == Token::kDecimalLiteral);
+		CHECK(tokens[2].token_type == Token::kDecimalLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Float Literals"){
 		REQUIRE(lex("99.0 -99e-10 +.99E+22", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].literal_type == Token::kFloatLiteral);
-		CHECK(tokens[1].literal_type == Token::kFloatLiteral);
-		CHECK(tokens[2].literal_type == Token::kFloatLiteral);
+		CHECK(tokens[0].token_type == Token::kFloatLiteral);
+		CHECK(tokens[1].token_type == Token::kFloatLiteral);
+		CHECK(tokens[2].token_type == Token::kFloatLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("String Literals"){
 		REQUIRE(lex("\" abcd \" \"\\U123456 \\u9999 \"", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].literal_type == Token::kStringLiteral);
+		CHECK(tokens[0].token_type == Token::kStringLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Boolean Literals"){
 		REQUIRE(lex("true false TRUE FALSE null yes no", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].literal_type == Token::kBooleanLiteral);
-		CHECK(tokens[1].literal_type == Token::kBooleanLiteral);
-		CHECK(tokens[2].literal_type != Token::kBooleanLiteral);
-		CHECK(tokens[3].literal_type != Token::kBooleanLiteral);
-		CHECK(tokens[4].literal_type != Token::kBooleanLiteral);
-		CHECK(tokens[5].literal_type != Token::kBooleanLiteral);
-		CHECK(tokens[6].literal_type != Token::kBooleanLiteral);
+		CHECK(tokens[0].token_type == Token::kBooleanLiteral);
+		CHECK(tokens[1].token_type == Token::kBooleanLiteral);
+		CHECK(tokens[2].token_type != Token::kBooleanLiteral);
+		CHECK(tokens[3].token_type != Token::kBooleanLiteral);
+		CHECK(tokens[4].token_type != Token::kBooleanLiteral);
+		CHECK(tokens[5].token_type != Token::kBooleanLiteral);
+		CHECK(tokens[6].token_type != Token::kBooleanLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Handling Error Literals"){

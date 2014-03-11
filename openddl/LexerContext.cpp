@@ -31,10 +31,10 @@ void Lexer::Context::lex_error(const std::string & name, const char * ts, const 
 	error.range_length = te - ts;
 	errors.push_back(error);
 }
-void Lexer::Context::lex_emit(openddl::Token::token_t t_type, openddl::Token::type_t d_type, openddl::Token::literal_t l_type, const char* ts, const char* te)
+void Lexer::Context::lex_emit(openddl::Token::token_t t_type, const char* ts, const char* te)
 {
 
-	if (l_type == openddl::Token::kStringLiteral && tokens.size() && tokens.back().literal_type == openddl::Token::kStringLiteral)
+	if (t_type == openddl::Token::kStringLiteral && tokens.size() && tokens.back().token_type == openddl::Token::kStringLiteral)
 	{
 		//Concatenate two string literals if they are adjacent without intervening comma
 		openddl::Token & t = tokens.back();
@@ -47,9 +47,6 @@ void Lexer::Context::lex_emit(openddl::Token::token_t t_type, openddl::Token::ty
 		//Create token on token stack
 		openddl::Token t;
 		t.token_type = t_type;
-		t.data_type = d_type;
-		t.literal_type = l_type;
-
 		t.payload = std::string(ts, te);
 		t.range_start = unsigned int(ts - input.c_str());
 		t.range_length = te - ts;

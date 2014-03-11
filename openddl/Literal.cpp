@@ -46,7 +46,7 @@ char consume_character(const std::string & in, int & position)
 	}
 	return value;
 }
-uint64_t decode_integer(openddl::Token::literal_t type,const std::string & in, bool & negate)
+uint64_t decode_integer(openddl::Token::token_t type,const std::string & in, bool & negate)
 {
 	uint64_t value = 0;
 	negate = false;
@@ -124,7 +124,7 @@ openddl::Literal openddl::Literal::construct(const Token & token, type_t type_hi
 	switch (type_hint)
 	{
 	case kBoolean:
-		if (token.literal_type == Token::kBooleanLiteral)
+		if (token.token_type == Token::kBooleanLiteral)
 		{
 			l.type = type_hint;
 			if (token.payload == "true")
@@ -136,7 +136,7 @@ openddl::Literal openddl::Literal::construct(const Token & token, type_t type_hi
 			type_error("Encoding mismatch constructing boolean literal");
 		break;
 	case kString:
-		if (token.literal_type == Token::kStringLiteral)
+		if (token.token_type == Token::kStringLiteral)
 		{
 			l.type = type_hint;
 			l.u_.s_value = new std::string(token.payload);
@@ -145,23 +145,23 @@ openddl::Literal openddl::Literal::construct(const Token & token, type_t type_hi
 			type_error("Encoding mismatch constructing string literal");
 		break;
 	case kInteger:
-		if (token.literal_type & (Token::kBinaryLiteral | Token::kHexLiteral | Token::kDecimalLiteral | Token::kCharacterLiteral))
+		if (token.is_integer_encoded())
 		{
 			l.type = type_hint;
-			l.u_.i_value = decode_integer(token.literal_type,token.payload,l.negate);
+			l.u_.i_value = decode_integer(token.token_type,token.payload,l.negate);
 		}
 		else
 			type_error("Encoding mismatch constructing integer literal");
 		break;
 	case kFloat:
-		if (token.literal_type & (Token::kBinaryLiteral | Token::kHexLiteral | Token::kDecimalLiteral | Token::kFloatLiteral))
+		if (token.is_float_encoded())
 		{
 			l.type = type_hint;
-			switch (token.literal_type)
+			switch (token.token_type)
 			{
 			case Token::kBinaryLiteral:
 			case Token::kHexLiteral:
-				l.u_.i_value = decode_integer(token.literal_type, token.payload, l.negate);
+				l.u_.i_value = decode_integer(token.token_type, token.payload, l.negate);
 				l.lexical_encoding = false;
 				break;
 			case Token::kDecimalLiteral:

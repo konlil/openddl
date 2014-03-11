@@ -29,7 +29,7 @@ namespace Lexer
 		void lex_error(const std::string & name, char const* ts, unsigned int te);
 		void lex_error(const std::string & name, const char * ts, const char* te);
 
-		void lex_emit(openddl::Token::token_t t_type, openddl::Token::type_t d_type, openddl::Token::literal_t l_type, const char* ts, const char* te);
+		void lex_emit(openddl::Token::token_t t_type, const char* ts, const char* te);
 	};
 
 }

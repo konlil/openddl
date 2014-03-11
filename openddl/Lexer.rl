@@ -10,10 +10,8 @@
 #define error(m) context.lex_error(m,ts,te)
 
 
-#define token(t)	context.lex_emit(t,openddl::Token::kInvalidType,openddl::Token::kInvalidLiteral, ts, te)
-#define literal(t)	context.lex_emit(openddl::Token::kLiteral,openddl::Token::kInvalidType,t, ts, te)
-#define datatype(t) context.lex_emit(openddl::Token::kDataType,t,openddl::Token::kInvalidLiteral, ts, te)
-#define arraytype() context.lex_emit(openddl::Token::kArrayType,openddl::Token::kInvalidType,openddl::Token::kInvalidLiteral, ts, te)
+#define token(t)	context.lex_emit(t, ts, te)
+
 
 
 %%{
@@ -77,16 +75,16 @@
 	main := 
 	|*
 		# Numeric Literals
-		decimal_literal		=>	{ literal(openddl::Token::kDecimalLiteral); };
-		hex_literal			=>	{ literal(openddl::Token::kHexLiteral);};
-		binary_literal		=>	{ literal(openddl::Token::kBinaryLiteral);};
-		float_literal		=>	{ literal(openddl::Token::kFloatLiteral);};
+		decimal_literal		=>	{ token(openddl::Token::kDecimalLiteral); };
+		hex_literal			=>	{ token(openddl::Token::kHexLiteral);};
+		binary_literal		=>	{ token(openddl::Token::kBinaryLiteral);};
+		float_literal		=>	{ token(openddl::Token::kFloatLiteral);};
 		#Fallback rule to catch improperly formatted numeric literals
 		(decimal_literal|hex_literal|binary_literal|float_literal) ^(0x01..0x20|[},\]])+ 
 							=> { error("lex.invalid_literal");};
 
 		#Boolean Literal
-		bool_literal		=>	{ literal(openddl::Token::kBooleanLiteral);};
+		bool_literal		=>	{ token(openddl::Token::kBooleanLiteral);};
 
 		# Name
 		name				=>	{ token(openddl::Token::kName);};
@@ -94,31 +92,31 @@
 		'null'				=>	{ token(openddl::Token::kNull);};
 
 		#Type Names
-		'bool'				=>	{ datatype(openddl::Token::kBool);};
-		'int8'				=>	{ datatype(openddl::Token::kInt8);};
-		'int16'				=>	{ datatype(openddl::Token::kInt16);};
-		'int32'				=>	{ datatype(openddl::Token::kInt32);};
-		'int64'				=>	{ datatype(openddl::Token::kInt64);};
-		'unsigned_int8'		=>	{ datatype(openddl::Token::kUnsignedInt8);};
-		'unsigned_int16'	=>	{ datatype(openddl::Token::kUnsignedInt16);};
-		'unsigned_int32'	=>	{ datatype(openddl::Token::kUnsignedInt32);};
-		'unsigned_int64'	=>	{ datatype(openddl::Token::kUnsignedInt64);};
-		'float'				=>	{ datatype(openddl::Token::kFloat);};
-		'double'			=>	{ datatype(openddl::Token::kDouble);};
-		'ref'				=>	{ datatype(openddl::Token::kRef);};
-		'string'			=>	{ datatype(openddl::Token::kString);};
-		'type'				=>  { datatype(openddl::Token::kType);};
+		'bool'				=>	{ token(openddl::Token::kBool);};
+		'int8'				=>	{ token(openddl::Token::kInt8);};
+		'int16'				=>	{ token(openddl::Token::kInt16);};
+		'int32'				=>	{ token(openddl::Token::kInt32);};
+		'int64'				=>	{ token(openddl::Token::kInt64);};
+		'unsigned_int8'		=>	{ token(openddl::Token::kUnsignedInt8);};
+		'unsigned_int16'	=>	{ token(openddl::Token::kUnsignedInt16);};
+		'unsigned_int32'	=>	{ token(openddl::Token::kUnsignedInt32);};
+		'unsigned_int64'	=>	{ token(openddl::Token::kUnsignedInt64);};
+		'float'				=>	{ token(openddl::Token::kFloat);};
+		'double'			=>	{ token(openddl::Token::kDouble);};
+		'ref'				=>	{ token(openddl::Token::kRef);};
+		'string'			=>	{ token(openddl::Token::kString);};
+		'type'				=>  { token(openddl::Token::kType);};
 		
 	
 
 		# String Literals
 		'"' (utf8|escape_char|'\\u' xdigit{4}|'\\U' xdigit{6})* :>> '"' 
-							=> { literal(openddl::Token::kStringLiteral);};
+							=> { token(openddl::Token::kStringLiteral);};
 		# Fallback path for catching errors
 		'"'					=> { fgoto recover_string_literal;};
 
-		# Character Literal
-		character_literal	=> { if(context.get_character_count() > 7) error("lex.character_length_error"); else literal(openddl::Token::kCharacterLiteral);}; 
+		# Character token
+		character_literal	=> { if(context.get_character_count() > 7) error("lex.character_length_error"); else token(openddl::Token::kCharacterLiteral);}; 
 		# Fallback path for catching errors
 		"'"					=> { fgoto recover_character_literal;};
 
@@ -168,3 +166,31 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 	return (p==pe);
 } 
 
+bool openddl::Token::is_float_encoded() const { 
+	return (token_type == kFloatLiteral || token_type == kDecimalLiteral || token_type == kBinaryLiteral || token_type == kHexLiteral); 
+}
+bool openddl::Token::is_integer_encoded() const { 
+	return (token_type == kCharacterLiteral || token_type == kDecimalLiteral || token_type == kBinaryLiteral || token_type == kHexLiteral); 
+}
+bool openddl::Token::is_data_type() const {
+	switch (token_type)
+	{
+	case kFloat:
+	case kDouble:
+	case kRef:
+	case kUnsignedInt8:
+	case kUnsignedInt16:
+	case kUnsignedInt32:
+	case kUnsignedInt64:
+	case kInt8:
+	case kInt16:
+	case kInt32:
+	case kInt64:
+	case kBool:
+	case kString:
+	case kType:
+		return true;
+	default:
+		return false;
+	}
+}

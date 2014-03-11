@@ -17,16 +17,10 @@ namespace openddl
 			kComma,
 			kLeftBrace,
 			kRightBrace,	
-			kDataType,
 			kIdentifier,
 			kName,
-			kLiteral,
 			kEquals,
-			kNull
-			
-		};
-		enum type_t
-		{
+			kNull,
 			kFloat,
 			kDouble,
 			kRef,
@@ -41,28 +35,23 @@ namespace openddl
 			kBool,
 			kString,
 			kType,
-			kInvalidType
-		};
-		enum literal_t
-		{
-			kBooleanLiteral = 1 << 0,
-			kFloatLiteral = 1 << 1,
-			kHexLiteral = 1 << 2,
-			kDecimalLiteral = 1 << 3,
-			kBinaryLiteral = 1 << 4,
-			kStringLiteral = 1 << 5,
-			kCharacterLiteral = 1 << 6,
-			kInvalidLiteral = 0
+			kBooleanLiteral,
+			kFloatLiteral,
+			kHexLiteral,
+			kDecimalLiteral,
+			kBinaryLiteral,
+			kStringLiteral,
+			kCharacterLiteral
 		};
 
+		bool is_float_encoded() const;
+		bool is_integer_encoded() const;
+		bool is_data_type() const;
+
 		token_t		token_type;			
-		type_t		data_type;			//Used only if token_type == kDataType
-		literal_t	literal_type;		//Used only if token_type == kLiteral
 
 		std::string payload;
 
-		
-		unsigned int line, position;
 		unsigned int range_start;
 		unsigned int range_length;
 
@@ -73,7 +62,7 @@ namespace openddl
 		
 		std::string payload;				//The literal (as string) which caused the error
 		std::string message;				//Plain text key describing error		
-		unsigned int line, position;		//Position of the error within the string/file
+
 		unsigned int range_start;			//Position of offset of offending literal in string
 		unsigned int range_length;
 	};
