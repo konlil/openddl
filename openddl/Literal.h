@@ -11,7 +11,7 @@
 
 namespace openddl
 {
-	struct Token;
+	namespace detail { struct Token; }
 	struct Reference
 	{
 		std::vector<std::string> path;
@@ -137,7 +137,7 @@ namespace openddl
 		bool lexical_encoding;
 	public:
 		//Construct Numeric Literal from token, providing type hint to enforce on token
-		static Literal construct(const Token & token, type_t type_hint);
+		static Literal construct(const detail::Token & token, type_t type_hint);
 
 	};
 }

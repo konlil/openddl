@@ -5,7 +5,7 @@
 
 #include "Literal.h"
 #include <string>
-#include "Lexer.h"
+#include "detail.h"
 
 char consume_character(const std::string & in, int & position)
 {
@@ -46,7 +46,7 @@ char consume_character(const std::string & in, int & position)
 	}
 	return value;
 }
-uint64_t decode_integer(openddl::Token::token_t type,const std::string & in, bool & negate)
+uint64_t decode_integer(openddl::detail::Token::token_t type,const std::string & in, bool & negate)
 {
 	uint64_t value = 0;
 	negate = false;
@@ -63,7 +63,7 @@ uint64_t decode_integer(openddl::Token::token_t type,const std::string & in, boo
 	}
 	switch (type)
 	{
-	case openddl::Token::kCharacterLiteral:
+	case openddl::detail::Token::kCharacterLiteral:
 	{
 		int position = 0;
 		std::string characters = in.substr(1, in.length() - 2);
@@ -75,13 +75,13 @@ uint64_t decode_integer(openddl::Token::token_t type,const std::string & in, boo
 		}
 		break;
 	}
-	case openddl::Token::kDecimalLiteral:
+	case openddl::detail::Token::kDecimalLiteral:
 		value = std::stoull(in.substr(offset),nullptr,10);
 		break;
-	case openddl::Token::kBinaryLiteral:
+	case openddl::detail::Token::kBinaryLiteral:
 		value = std::stoull(in.substr(offset+2), nullptr, 2);
 		break;
-	case openddl::Token::kHexLiteral:
+	case openddl::detail::Token::kHexLiteral:
 		value = std::stoull(in.substr(offset + 2), nullptr, 16);
 		break;
 	}
@@ -118,13 +118,13 @@ openddl::Literal::Literal(Literal && l) : type(l.type), negate(l.negate), lexica
 		u_.d_value = l.u_.d_value; break;
 	}
 }
-openddl::Literal openddl::Literal::construct(const Token & token, type_t type_hint)
+openddl::Literal openddl::Literal::construct(const detail::Token & token, type_t type_hint)
 {
 	Literal l;
 	switch (type_hint)
 	{
 	case kBoolean:
-		if (token.token_type == Token::kBooleanLiteral)
+		if (token.token_type == detail::Token::kBooleanLiteral)
 		{
 			l.type = type_hint;
 			if (token.payload == "true")
@@ -136,7 +136,7 @@ openddl::Literal openddl::Literal::construct(const Token & token, type_t type_hi
 			type_error("Encoding mismatch constructing boolean literal");
 		break;
 	case kString:
-		if (token.token_type == Token::kStringLiteral)
+		if (token.token_type == detail::Token::kStringLiteral)
 		{
 			l.type = type_hint;
 			l.u_.s_value = new std::string(token.payload);
@@ -159,13 +159,13 @@ openddl::Literal openddl::Literal::construct(const Token & token, type_t type_hi
 			l.type = type_hint;
 			switch (token.token_type)
 			{
-			case Token::kBinaryLiteral:
-			case Token::kHexLiteral:
+			case detail::Token::kBinaryLiteral:
+			case detail::Token::kHexLiteral:
 				l.u_.i_value = decode_integer(token.token_type, token.payload, l.negate);
 				l.lexical_encoding = false;
 				break;
-			case Token::kDecimalLiteral:
-			case Token::kFloatLiteral:
+			case detail::Token::kDecimalLiteral:
+			case detail::Token::kFloatLiteral:
 				l.lexical_encoding = true;
 				l.u_.d_value = std::stod(token.payload);
 				break;

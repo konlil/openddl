@@ -1,25 +1,20 @@
-// Tests.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
-
-
 //================================================================================================================
 // Copyright 2014 Denis Hilliard (armchaircommando@gmail.com)
 // Licensed under MIT License
 //================================================================================================================
 
+#include "stdafx.h"
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
-#include "../openddl/Lexer.h"
+#include "../openddl/detail.h"
 #include "../openddl/Literal.h"
 
 TEST_CASE("Comments", "[lexer]"){
-	using openddl::Token;
-	using openddl::TokenError;
-	using openddl::lex;
+	using openddl::detail::Token;
+	using openddl::detail::Error;
+	using openddl::detail::lex;
 	std::vector<Token> tokens;
-	std::vector<TokenError> errors;
+	std::vector<Error> errors;
 	SECTION("Block Comment")
 	{
 		REQUIRE(lex("/* */", tokens, errors));
@@ -54,21 +49,21 @@ TEST_CASE("Comments", "[lexer]"){
 	}
 }
 TEST_CASE("Structural Tokens", "[lexer]"){
-	using openddl::Token;
-	using openddl::TokenError;
-	using openddl::lex;
+	using openddl::detail::Token;
+	using openddl::detail::Error;
+	using openddl::detail::lex;
 	std::vector<Token> tokens;
-	std::vector<TokenError> errors;
+	std::vector<Error> errors;
 	REQUIRE(lex("[ ] { , }", tokens, errors));
 	REQUIRE(errors.size() == 0);
 	CHECK(tokens.size() == 5);
 }
 TEST_CASE("Textual Tokens", "[lexer]"){
-	using openddl::Token;
-	using openddl::TokenError;
-	using openddl::lex;
+	using openddl::detail::Token;
+	using openddl::detail::Error;
+	using openddl::detail::lex;
 	std::vector<Token> tokens;
-	std::vector<TokenError> errors;
+	std::vector<Error> errors;
 	SECTION("Types"){
 		REQUIRE(lex("bool float double int8 int16 int32 int64 unsigned_int8 unsigned_int16 unsigned_int32 unsigned_int64 string ref type", tokens, errors));
 		REQUIRE(errors.size() == 0);
@@ -117,11 +112,11 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 	}
 }
 TEST_CASE("Literal Encodings", "[lexer]"){
-	using openddl::Token;
-	using openddl::TokenError;
-	using openddl::lex;
+	using openddl::detail::Token;
+	using openddl::detail::Error;
+	using openddl::detail::lex;
 	std::vector<Token> tokens;
-	std::vector<TokenError> errors;
+	std::vector<Error> errors;
 	SECTION("Binary Literals"){
 		REQUIRE(lex("0b11 +0B11 -0B00", tokens, errors));
 		REQUIRE(errors.size() == 0);
@@ -204,8 +199,8 @@ TEST_CASE("Literal Encodings", "[lexer]"){
 
 TEST_CASE("Literal", "[literal]"){
 	using openddl::Literal;
-	std::vector<openddl::Token> tokens;
-	std::vector<openddl::TokenError> errors;
+	std::vector<openddl::detail::Token> tokens;
+	std::vector<openddl::detail::Error> errors;
 	SECTION("Integer Conversion"){
 
 		REQUIRE(lex("-1094861636 0x41424344 +0b01000001010000100100001101000100 'ABCD'", tokens, errors));

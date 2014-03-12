@@ -4,8 +4,7 @@
 //================================================================================================================
 
 #include "stdafx.h"
-#include "Lexer.h"
-#include "LexerContext.h"
+#include "detail.h"
 
 #define error(m) context.lex_error(m,ts,te)
 
@@ -75,48 +74,48 @@
 	main := 
 	|*
 		# Numeric Literals
-		decimal_literal		=>	{ token(openddl::Token::kDecimalLiteral); };
-		hex_literal			=>	{ token(openddl::Token::kHexLiteral);};
-		binary_literal		=>	{ token(openddl::Token::kBinaryLiteral);};
-		float_literal		=>	{ token(openddl::Token::kFloatLiteral);};
+		decimal_literal		=>	{ token(Token::kDecimalLiteral); };
+		hex_literal			=>	{ token(Token::kHexLiteral);};
+		binary_literal		=>	{ token(Token::kBinaryLiteral);};
+		float_literal		=>	{ token(Token::kFloatLiteral);};
 		#Fallback rule to catch improperly formatted numeric literals
 		(decimal_literal|hex_literal|binary_literal|float_literal) ^(0x01..0x20|[},\]])+ 
 							=> { error("lex.invalid_literal");};
 
 		#Boolean Literal
-		bool_literal		=>	{ token(openddl::Token::kBooleanLiteral);};
+		bool_literal		=>	{ token(Token::kBooleanLiteral);};
 
 		# Name
-		name				=>	{ token(openddl::Token::kName);};
-		identifier			=>	{ token(openddl::Token::kIdentifier);};
-		'null'				=>	{ token(openddl::Token::kNull);};
+		name				=>	{ token(Token::kName);};
+		identifier			=>	{ token(Token::kIdentifier);};
+		'null'				=>	{ token(Token::kNull);};
 
 		#Type Names
-		'bool'				=>	{ token(openddl::Token::kBool);};
-		'int8'				=>	{ token(openddl::Token::kInt8);};
-		'int16'				=>	{ token(openddl::Token::kInt16);};
-		'int32'				=>	{ token(openddl::Token::kInt32);};
-		'int64'				=>	{ token(openddl::Token::kInt64);};
-		'unsigned_int8'		=>	{ token(openddl::Token::kUnsignedInt8);};
-		'unsigned_int16'	=>	{ token(openddl::Token::kUnsignedInt16);};
-		'unsigned_int32'	=>	{ token(openddl::Token::kUnsignedInt32);};
-		'unsigned_int64'	=>	{ token(openddl::Token::kUnsignedInt64);};
-		'float'				=>	{ token(openddl::Token::kFloat);};
-		'double'			=>	{ token(openddl::Token::kDouble);};
-		'ref'				=>	{ token(openddl::Token::kRef);};
-		'string'			=>	{ token(openddl::Token::kString);};
-		'type'				=>  { token(openddl::Token::kType);};
+		'bool'				=>	{ token(Token::kBool);};
+		'int8'				=>	{ token(Token::kInt8);};
+		'int16'				=>	{ token(Token::kInt16);};
+		'int32'				=>	{ token(Token::kInt32);};
+		'int64'				=>	{ token(Token::kInt64);};
+		'unsigned_int8'		=>	{ token(Token::kUnsignedInt8);};
+		'unsigned_int16'	=>	{ token(Token::kUnsignedInt16);};
+		'unsigned_int32'	=>	{ token(Token::kUnsignedInt32);};
+		'unsigned_int64'	=>	{ token(Token::kUnsignedInt64);};
+		'float'				=>	{ token(Token::kFloat);};
+		'double'			=>	{ token(Token::kDouble);};
+		'ref'				=>	{ token(Token::kRef);};
+		'string'			=>	{ token(Token::kString);};
+		'type'				=>  { token(Token::kType);};
 		
 	
 
 		# String Literals
 		'"' (utf8|escape_char|'\\u' xdigit{4}|'\\U' xdigit{6})* :>> '"' 
-							=> { token(openddl::Token::kStringLiteral);};
+							=> { token(Token::kStringLiteral);};
 		# Fallback path for catching errors
 		'"'					=> { fgoto recover_string_literal;};
 
 		# Character token
-		character_literal	=> { if(context.get_character_count() > 7) error("lex.character_length_error"); else token(openddl::Token::kCharacterLiteral);}; 
+		character_literal	=> { if(context.get_character_count() > 7) error("lex.character_length_error"); else token(Token::kCharacterLiteral);}; 
 		# Fallback path for catching errors
 		"'"					=> { fgoto recover_character_literal;};
 
@@ -125,12 +124,12 @@
 		block_comment;
 
 		# Structural characters
-		',' =>						{ token(openddl::Token::kComma);};
-		'{' =>						{ token(openddl::Token::kLeftBrace);};
-		'}' =>						{ token(openddl::Token::kRightBrace);};
-		'['	=>						{ token(openddl::Token::kLeftSquareBracket);};
-		']'	=>						{ token(openddl::Token::kRightSquareBracket);};
-		'=' =>						{ token(openddl::Token::kEquals);};
+		',' =>						{ token(Token::kComma);};
+		'{' =>						{ token(Token::kLeftBrace);};
+		'}' =>						{ token(Token::kRightBrace);};
+		'['	=>						{ token(Token::kLeftSquareBracket);};
+		']'	=>						{ token(Token::kRightSquareBracket);};
+		'=' =>						{ token(Token::kEquals);};
 		'*/' =>						{error("lex.trailing_close_comment");};
 		# Whitespace
 		(0x01..0x20)-'\n';
@@ -142,9 +141,9 @@
 }%%
 
 
-bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vector<TokenError> & errors)
+bool openddl::detail::lex(const std::string & input,std::vector<Token> & tokens, std::vector<Error> & errors)
 {
-	Lexer::Context context(input,tokens,errors);
+	LexerContext context(input,tokens,errors);
 	
 	char const *p = input.c_str();
 	//Tracks the character which caused the character error within string or character literal
@@ -166,31 +165,4 @@ bool openddl::lex(const std::string & input,std::vector<Token> &tokens,std::vect
 	return (p==pe);
 } 
 
-bool openddl::Token::is_float_encoded() const { 
-	return (token_type == kFloatLiteral || token_type == kDecimalLiteral || token_type == kBinaryLiteral || token_type == kHexLiteral); 
-}
-bool openddl::Token::is_integer_encoded() const { 
-	return (token_type == kCharacterLiteral || token_type == kDecimalLiteral || token_type == kBinaryLiteral || token_type == kHexLiteral); 
-}
-bool openddl::Token::is_data_type() const {
-	switch (token_type)
-	{
-	case kFloat:
-	case kDouble:
-	case kRef:
-	case kUnsignedInt8:
-	case kUnsignedInt16:
-	case kUnsignedInt32:
-	case kUnsignedInt64:
-	case kInt8:
-	case kInt16:
-	case kInt32:
-	case kInt64:
-	case kBool:
-	case kString:
-	case kType:
-		return true;
-	default:
-		return false;
-	}
-}
+

@@ -27,16 +27,7 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Lexer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Literal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Parser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LexerContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="catch.hpp">
@@ -45,12 +36,12 @@
     <ClInclude Include="Structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="detail.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="openddl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Lexer.cpp">
@@ -66,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Structure.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="detail.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
