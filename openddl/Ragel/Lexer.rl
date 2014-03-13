@@ -69,8 +69,8 @@
 				'float' | 'double' | 'string' | 'ref' | 'type';
 
 
-	name = (alpha | '_' ) (alnum | '_')* - data_type -'null';
-	identifier = [$%] name;
+	identifier = (alpha | '_' ) (alnum | '_')* - data_type -'null';
+	name = [$%] identifier;
 	main := 
 	|*
 		# Numeric Literals

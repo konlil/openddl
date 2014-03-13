@@ -50,7 +50,7 @@ void openddl::detail::LexerContext::lex_emit(Token::token_t t_type, const char* 
 		t.payload = std::string(ts, te);
 		t.range_start = unsigned int(ts - input.c_str());
 		t.range_length = te - ts;
-
+		t.line = line;
 		tokens.push_back(t);
 	}
 

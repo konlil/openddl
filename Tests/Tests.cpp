@@ -92,22 +92,22 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 		CHECK(tokens[3].token_type == Token::kRightSquareBracket);
 		tokens.clear(); errors.clear();
 	}
-	SECTION("Names"){
+	SECTION("Identiiers"){
 		REQUIRE(lex("hello world null float", tokens, errors));
 		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].token_type == Token::kName);
-		CHECK(tokens[1].token_type == Token::kName);
-		CHECK(tokens[2].token_type != Token::kName);
-		CHECK(tokens[3].token_type != Token::kName);
+		CHECK(tokens[0].token_type == Token::kIdentifier);
+		CHECK(tokens[1].token_type == Token::kIdentifier);
+		CHECK(tokens[2].token_type != Token::kIdentifier);
+		CHECK(tokens[3].token_type != Token::kIdentifier);
 		tokens.clear(); errors.clear();
 	}
-	SECTION("Identifiers")
+	SECTION("Names")
 	{
 		REQUIRE(lex("null $hello %hello", tokens, errors));
 		REQUIRE(errors.size() == 0);
 		CHECK(tokens[0].token_type == Token::kNull);
-		CHECK(tokens[1].token_type == Token::kIdentifier);
-		CHECK(tokens[2].token_type == Token::kIdentifier);
+		CHECK(tokens[1].token_type == Token::kName);
+		CHECK(tokens[2].token_type == Token::kName);
 		tokens.clear(); errors.clear();
 	}
 }
@@ -249,4 +249,11 @@ TEST_CASE("Literal", "[literal]"){
 
 }
 
-
+TEST_CASE("Parser", "[parser]"){
+	using namespace openddl::detail;
+	std::vector<Token> tokens;
+	std::vector<Error> errors;
+	REQUIRE(lex("float $apex {3.0}", tokens, errors));
+	REQUIRE(errors.size() == 0);
+	REQUIRE(parse(tokens, errors));
+}

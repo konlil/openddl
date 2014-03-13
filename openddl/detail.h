@@ -14,14 +14,14 @@ namespace openddl
 		{
 			enum token_t
 			{
-				kLeftSquareBracket,
+				kLeftSquareBracket = 1,
 				kRightSquareBracket,
 				kComma,
 				kLeftBrace,
 				kRightBrace,
+				kEquals,
 				kIdentifier,
 				kName,
-				kEquals,
 				kNull,
 				kBooleanLiteral,
 				kFloatLiteral,
@@ -32,7 +32,6 @@ namespace openddl
 				kCharacterLiteral,
 				kFloat,
 				kDouble,
-				kRef,
 				kUnsignedInt8,
 				kUnsignedInt16,
 				kUnsignedInt32,
@@ -41,6 +40,7 @@ namespace openddl
 				kInt16,
 				kInt32,
 				kInt64,
+				kRef,
 				kBool,
 				kString,
 				kType
@@ -57,6 +57,8 @@ namespace openddl
 			unsigned int range_start;
 			unsigned int range_length;
 
+			unsigned int line;
+
 		};
 		inline bool has_intervening_whitespace(const Token & a, const Token & b) { return (a.range_start + a.range_length) != b.range_start; }
 		struct Error
@@ -70,14 +72,9 @@ namespace openddl
 		};
 
 		//Will only return false if an internal error has occurred and not all input was consumed.
-		//Accepts an input string, emitting successfully parsed tokens and errors into seperate arrays
-		//If any errors exist, the token stream should not be used as it will not be in a valid state.
-		//Internally performs the following duties;
-		//	(Lexical) Validation of literals
-		//	Concatenating adjacent string literals
-		//	Consuming whitespace/comments
 		bool lex(const std::string & input, std::vector<Token> &tokens, std::vector<Error> & errors);
-		void parse(const std::vector<Token> & tokens, std::vector<Error> & errors);
+		//Will only return false if an internal error has occurred and not all input was consumed.
+		bool parse(const std::vector<Token> & tokens, std::vector<Error> & errors);
 
 
 		struct LexerContext
