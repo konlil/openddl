@@ -33,9 +33,9 @@ namespace openddl
 		struct Error;
 		struct Command;
 
-		//Will only return false if an internal error has occurred and not all input was consumed.
+		//Will return false upon error. If errors is also empty, an undefined error has occurred and should be reported
 		bool lex(const std::string & input, std::vector<Token> &tokens, std::vector<Error> & errors);
-		//Will only return false if an internal error has occurred and not all input was consumed.
+		//Will return false upon error. If errors is also empty, an undefined error has occurred and should be reported
 		bool parse(const std::vector<Token> & tokens, std::vector<Command> & commands, std::vector<Error> & errors);
 
 	}

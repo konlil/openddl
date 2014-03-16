@@ -231,7 +231,7 @@ _match:
 	case 7:
 #line 34 "C:/Users/Denis/Development/openddl/openddl/detail/Ragel/Parser.rl"
 	{
-		context.push_data_list(*p);
+		context.push_data_list(p);
 	}
 	break;
 	case 8:
@@ -254,5 +254,5 @@ _again:
 	}
 
 #line 117 "C:/Users/Denis/Development/openddl/openddl/detail/Ragel/Parser.rl"
-	return p==pe;
+	return p==pe && errors.empty();
 }

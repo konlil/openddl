@@ -983,7 +983,7 @@ _again:
 
 #line 165 "C:/Users/Denis/Development/openddl/openddl/detail/Ragel/Lexer.rl"
 	
-	return (p==pe);
+	return p==pe && errors.empty();
 } 
 
 

@@ -263,7 +263,7 @@ int openddl::detail::detect_limits(Type type, const Command::LiteralPayload & pa
 		{ 0, UINT32_MAX },
 		{ 0, UINT64_MAX },
 		{ -INT8_MIN, INT8_MAX },
-		{ -INT16_MIN, INT8_MAX },
+		{ -INT16_MIN, INT16_MAX },
 		{ -INT32_MIN, INT32_MAX },
 		{ -INT64_MIN, INT64_MAX },
 	};
@@ -310,9 +310,9 @@ int openddl::detail::detect_limits(Type type, const Command::LiteralPayload & pa
 			return 0;
 		else if (integer_limits[type - Type::kUnsignedInt8][0] == 0 && payload.value.integer_.negate) //Unsigned integer literals may not be negated
 			return -1;
-		else if (integer_limits[type - Type::kUnsignedInt8][0] > payload.value.integer_.value)
+		else if (payload.value.integer_.value > integer_limits[type - Type::kUnsignedInt8][0] && payload.value.integer_.negate)
 			return -1;
-		else if (integer_limits[type - Type::kUnsignedInt8][1] > payload.value.integer_.value)
+		else if (payload.value.integer_.value > integer_limits[type - Type::kUnsignedInt8][1] && !payload.value.integer_.negate)
 			return 1;
 		else
 			return 0;

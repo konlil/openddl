@@ -11,64 +11,25 @@ int main(int argc, char * argv[])
 	std::vector<Token> tokens;
 	std::vector<Error> errors;
 	std::vector<Command> commands;
-	if (!lex("float {3.0} int8 {99,22} ref {null}", tokens, errors))
+	if (!lex("int64 { -99, 2000, -2000 } int8{ 1,2,3}", tokens, errors))
 	{
-		std::cout << "Error during lexing" << std::endl;	
+		std::cout << "An error occurred during lexing" << std::endl;
+		for (auto & e : errors)
+			std::cout << "-- " << e.message << ": " << e.payload << std::endl;
 	}	
+	else if (!parse(tokens, commands, errors))
+	{
+		std::cout << "An error occurred during parsing" << std::endl;
+		for (auto & e : errors)
+			std::cout << "-- " <<  e.message << ": "<< e.payload << std::endl;
+	}
 	else
 	{
-		for (auto & e : errors)
-			std::cout << e.message << std::endl;
-		if (!parse(tokens, commands, errors))
-		{
-			std::cout << "Error during parsing" << std::endl;
-			for (auto & e : errors)
-				std::cout << e.message << std::endl;
-		}
-		else
-		{
-			
-			if (errors.size() == 0)
-			{
-				std::cout << "Success" << std::endl;
-				std::string format("-- ");
-				for (auto & c : commands)
-				{
-					switch (c.type)
-					{
-					case Command::kDataList:
-						std::cout << "Got data list with "<< c.payload.list_.length << " elements."<< std::endl;
-						break;
-					case Command::kLiteral:
-					{
-						std::cout << format << "Got ";
-						switch (c.payload.literal_.encoding)
-						{
-						case Command::LiteralPayload::kBoolean:
-							std::cout << "boolean"; break;
-						case Command::LiteralPayload::kFloat:
-							std::cout << "float"; break;
-						case Command::LiteralPayload::kInteger:
-							std::cout << "integer"; break;
-						case Command::LiteralPayload::kReference:
-							std::cout << "reference"; break;
-						case Command::LiteralPayload::kString:
-							std::cout << "string"; break;
-						case Command::LiteralPayload::kType:
-							std::cout << "type"; break;
-						}
-						std::cout <<" Literal" << std::endl;
-					}
-						
-						
-					}
-				}
-			}
-			else
-				for (auto & e : errors)
-					std::cout << e.message << std::endl;
-		}
-	
+		std::cout << "Successfully parsed input string" << std::endl;
+		std::cout << "-- Got " << tokens.size() << " tokens." << std::endl;
+		std::cout << "-- Got " << commands.size() << " commands." << std::endl;
 	}
+		
+	return 0;
 	
 }

@@ -32,7 +32,7 @@ using namespace openddl::detail;
 	}
 
 	action on_data_list_start{
-		context.push_data_list(*p);
+		context.push_data_list(p);
 	}
 	action on_data_list_end{
 		context.end_data_list();
@@ -114,5 +114,5 @@ bool openddl::detail::parse(const std::vector<Token> & tokens, std::vector<Comma
 	
 	%% write init;
 	%% write exec;
-	return p==pe;
+	return p==pe && errors.empty();
 }

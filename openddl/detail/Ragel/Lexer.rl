@@ -163,7 +163,7 @@ bool openddl::detail::lex(const std::string & input,std::vector<Token> & tokens,
 	%% write init;
 	%% write exec;
 	
-	return (p==pe);
+	return p==pe && errors.empty();
 } 
 
 

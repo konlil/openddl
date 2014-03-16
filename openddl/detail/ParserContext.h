@@ -18,8 +18,9 @@ namespace openddl
 		private:
 			std::vector<Command::LiteralPayload> literals;
 			std::vector<std::string> reference;
-			Type element_type;
+			Token const * element_type;
 			unsigned int element_count;
+			bool reference_error;
 
 		public:
 
@@ -29,9 +30,9 @@ namespace openddl
 			void push_reference();					//Used to push built reference into command stream
 
 			void push_array_element();
-			void push_data_list(const Token & type);
+			void push_data_list(Token const * type);
 			void end_data_list();
-			void push_data_array_list(const Token & type, const Token & dimensions);
+			void push_data_array_list(const Token * type, const Token * dimensions);
 			void end_data_array_list();
 
 		};

@@ -7,66 +7,95 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 #include "../openddl/detail.h"
-#include "../openddl/Literal.h"
+#include "../openddl/detail/Command.h"
+#include "../openddl/detail/Error.h"
+#include "../openddl/detail/Token.h"
+
+bool token_has_float_encoding(const openddl::detail::Token & token)
+{
+	using namespace openddl::detail;
+	switch (token.token_type)
+	{
+	case Token::kBinaryLiteral:
+	case Token::kHexLiteral:
+	case Token::kDecimalLiteral:
+	case Token::kFloatLiteral:
+		return true;
+	default:
+		return false;
+	}
+}
+bool token_has_integer_encoding(const openddl::detail::Token & token)
+{
+	using namespace openddl::detail;
+	switch (token.token_type)
+	{
+	case Token::kBinaryLiteral:
+	case Token::kHexLiteral:
+	case Token::kDecimalLiteral:
+	case Token::kCharacterLiteral:
+		return true;
+	default:
+		return false;
+	}
+}
+bool token_is_data_type(const openddl::detail::Token & token)
+{
+	using namespace openddl::detail;
+	return token.token_type >= Token::kUnsignedInt8 && token.token_type <= Token::kInt64 || token.token_type == Token::kFloat || token.token_type == Token::kDouble;
+}
 
 TEST_CASE("Comments", "[lexer]"){
-	using openddl::detail::Token;
-	using openddl::detail::Error;
-	using openddl::detail::lex;
+	using namespace openddl::detail;
 	std::vector<Token> tokens;
 	std::vector<Error> errors;
 	SECTION("Block Comment")
 	{
 		REQUIRE(lex("/* */", tokens, errors));
-		REQUIRE(errors.size() == 0);
-		CHECK(tokens.size() == 0);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Nested Block Comment")
 	{
-		REQUIRE(lex("/* /* */", tokens, errors));
-		REQUIRE(errors.size() == 1);
+		REQUIRE_FALSE(lex("/* /* */", tokens, errors));
+		REQUIRE_FALSE(errors.empty());
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Trailing Close Block Comment")
 	{
-		REQUIRE(lex("*/", tokens, errors));
-		REQUIRE(errors.size() == 1);
+		REQUIRE_FALSE(lex("*/", tokens, errors));
+		REQUIRE_FALSE(errors.empty());
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Unterminated Block Comment")
 	{
-		REQUIRE(lex("/*", tokens, errors));
-		REQUIRE(errors.size() == 1);
+		REQUIRE_FALSE(lex("/*", tokens, errors));
+		REQUIRE_FALSE(errors.empty());
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Line Comment")
 	{
 		REQUIRE(lex("//   \n // ", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens.size() == 0);
 		tokens.clear(); errors.clear();
 	}
 }
 TEST_CASE("Structural Tokens", "[lexer]"){
-	using openddl::detail::Token;
-	using openddl::detail::Error;
-	using openddl::detail::lex;
+	using namespace openddl::detail;
 	std::vector<Token> tokens;
 	std::vector<Error> errors;
 	REQUIRE(lex("[ ] { , }", tokens, errors));
-	REQUIRE(errors.size() == 0);
+	REQUIRE(errors.empty());
 	CHECK(tokens.size() == 5);
 }
 TEST_CASE("Textual Tokens", "[lexer]"){
-	using openddl::detail::Token;
-	using openddl::detail::Error;
-	using openddl::detail::lex;
+
+	using namespace openddl::detail;
 	std::vector<Token> tokens;
 	std::vector<Error> errors;
 	SECTION("Types"){
-		REQUIRE(lex("bool float double int8 int16 int32 int64 unsigned_int8 unsigned_int16 unsigned_int32 unsigned_int64 string ref type", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(openddl::detail::lex("bool float double int8 int16 int32 int64 unsigned_int8 unsigned_int16 unsigned_int32 unsigned_int64 string ref type", tokens, errors));
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kBool);
 		CHECK(tokens[1].token_type == Token::kFloat);
 		CHECK(tokens[2].token_type == Token::kDouble);
@@ -85,16 +114,16 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 	}
 	SECTION("Array Types"){
 		REQUIRE(lex("float[3]", tokens, errors));
-		REQUIRE(errors.size() == 0);
-		CHECK(tokens[0].is_data_type());
+		REQUIRE(errors.empty());
+		CHECK(token_is_data_type(tokens[0]));
 		CHECK(tokens[1].token_type == Token::kLeftSquareBracket);
-		CHECK(tokens[2].is_integer_encoded());
+		CHECK(token_has_integer_encoding(tokens[2]));
 		CHECK(tokens[3].token_type == Token::kRightSquareBracket);
 		tokens.clear(); errors.clear();
 	}
-	SECTION("Identiiers"){
+	SECTION("Identifiers"){
 		REQUIRE(lex("hello world null float", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kIdentifier);
 		CHECK(tokens[1].token_type == Token::kIdentifier);
 		CHECK(tokens[2].token_type != Token::kIdentifier);
@@ -104,7 +133,7 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 	SECTION("Names")
 	{
 		REQUIRE(lex("null $hello %hello", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kNull);
 		CHECK(tokens[1].token_type == Token::kName);
 		CHECK(tokens[2].token_type == Token::kName);
@@ -112,14 +141,13 @@ TEST_CASE("Textual Tokens", "[lexer]"){
 	}
 }
 TEST_CASE("Literal Encodings", "[lexer]"){
-	using openddl::detail::Token;
-	using openddl::detail::Error;
-	using openddl::detail::lex;
+
+	using namespace openddl::detail;
 	std::vector<Token> tokens;
 	std::vector<Error> errors;
 	SECTION("Binary Literals"){
 		REQUIRE(lex("0b11 +0B11 -0B00", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kBinaryLiteral);
 		CHECK(tokens[1].token_type == Token::kBinaryLiteral);
 		CHECK(tokens[2].token_type == Token::kBinaryLiteral);
@@ -127,7 +155,7 @@ TEST_CASE("Literal Encodings", "[lexer]"){
 	}
 	SECTION("Hex Literals"){
 		REQUIRE(lex("0x00 +0x99 -0xFF", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kHexLiteral);
 		CHECK(tokens[1].token_type == Token::kHexLiteral);
 		CHECK(tokens[2].token_type == Token::kHexLiteral);
@@ -135,7 +163,7 @@ TEST_CASE("Literal Encodings", "[lexer]"){
 	}
 	SECTION("Character Literals"){
 		REQUIRE(lex("'a' '\\x99' '\\t'", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kCharacterLiteral);
 		CHECK(tokens[1].token_type == Token::kCharacterLiteral);
 		CHECK(tokens[2].token_type == Token::kCharacterLiteral);
@@ -143,7 +171,7 @@ TEST_CASE("Literal Encodings", "[lexer]"){
 	}
 	SECTION("Decimal Literals"){
 		REQUIRE(lex("99 -1000 +1337", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kDecimalLiteral);
 		CHECK(tokens[1].token_type == Token::kDecimalLiteral);
 		CHECK(tokens[2].token_type == Token::kDecimalLiteral);
@@ -151,7 +179,7 @@ TEST_CASE("Literal Encodings", "[lexer]"){
 	}
 	SECTION("Float Literals"){
 		REQUIRE(lex("99.0 -99e-10 +.99E+22", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kFloatLiteral);
 		CHECK(tokens[1].token_type == Token::kFloatLiteral);
 		CHECK(tokens[2].token_type == Token::kFloatLiteral);
@@ -159,13 +187,13 @@ TEST_CASE("Literal Encodings", "[lexer]"){
 	}
 	SECTION("String Literals"){
 		REQUIRE(lex("\" abcd \" \"\\U123456 \\u9999 \"", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kStringLiteral);
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Boolean Literals"){
 		REQUIRE(lex("true false TRUE FALSE null yes no", tokens, errors));
-		REQUIRE(errors.size() == 0);
+		REQUIRE(errors.empty());
 		CHECK(tokens[0].token_type == Token::kBooleanLiteral);
 		CHECK(tokens[1].token_type == Token::kBooleanLiteral);
 		CHECK(tokens[2].token_type != Token::kBooleanLiteral);
@@ -176,84 +204,23 @@ TEST_CASE("Literal Encodings", "[lexer]"){
 		tokens.clear(); errors.clear();
 	}
 	SECTION("Handling Error Literals"){
-		REQUIRE(lex("0b1222 0xAZX 99AT 30.0Y 'AYC\\c' \" \x5C \"", tokens, errors));
-		CHECK(errors[0].payload == "0b1222");
-		CHECK(errors[1].payload == "0xAZX");
-		CHECK(errors[2].payload == "99AT");
-		CHECK(errors[3].payload == "30.0Y");
-		CHECK(errors[4].payload == "'AYC\\c'");
-		CHECK(errors[5].payload == "\" \x5C \"");
+		REQUIRE_FALSE(lex("0b1222 0xAZX 99AT 30.0Y 'AYC\\c' \" \x5C \"", tokens, errors));
+		REQUIRE_FALSE(errors.empty());
+		CHECK(errors.size() == 6);
 		tokens.clear(); errors.clear();
 
 	}
 	SECTION("Handling Unterminated strings/characters"){
-		REQUIRE(lex("\" partial string", tokens, errors));
-		REQUIRE(errors.size() == 1);
+		REQUIRE_FALSE(openddl::detail::lex("\" partial string", tokens, errors));
+		REQUIRE_FALSE(errors.empty());
 		tokens.clear(); errors.clear();
-		REQUIRE(lex("' part", tokens, errors));
-		REQUIRE(errors.size() == 1);
+		REQUIRE_FALSE(lex("' part", tokens, errors));
+		REQUIRE_FALSE(errors.empty());
 		tokens.clear(); errors.clear();
 
 	}
-}
-
-TEST_CASE("Literal", "[literal]"){
-	using openddl::Literal;
-	std::vector<openddl::detail::Token> tokens;
-	std::vector<openddl::detail::Error> errors;
-	SECTION("Integer Conversion"){
-
-		REQUIRE(lex("-1094861636 0x41424344 +0b01000001010000100100001101000100 'ABCD'", tokens, errors));
-		REQUIRE(errors.size() == 0);
-
-		//Overflow errors
-		CHECK_THROWS(Literal::construct(tokens[0], Literal::kInteger).get<unsigned int>());
-		CHECK_THROWS(Literal::construct(tokens[0], Literal::kInteger).get<short>());
-		CHECK_THROWS(Literal::construct(tokens[0], Literal::kInteger).get<char>());
-
-		CHECK(Literal::construct(tokens[0], Literal::kInteger).get<int>() == -'ABCD');
-		CHECK(Literal::construct(tokens[1], Literal::kInteger).get<unsigned int>() == 'ABCD');
-		CHECK(Literal::construct(tokens[2], Literal::kInteger).get<uint64_t>() == 'ABCD');
-		CHECK(Literal::construct(tokens[3], Literal::kInteger).get<int>() == 'ABCD');
-		tokens.clear(); errors.clear();
-	}
-	SECTION("Float Literal"){
-
-		REQUIRE(lex("99 0x3f800000 -30.0 'ABCD'", tokens, errors));
-		REQUIRE(errors.size() == 0);
-		CHECK(Literal::construct(tokens[0], Literal::kFloat).get<float>() == 99.0f);
-		CHECK(Literal::construct(tokens[0], Literal::kFloat).get<double>() == 99.0);
-		CHECK(Literal::construct(tokens[1], Literal::kFloat).get<float>() == 1.0f);
-		CHECK(Literal::construct(tokens[1], Literal::kFloat).get<double>() == 5.26354424712e-315);
-		CHECK(Literal::construct(tokens[2], Literal::kFloat).get<float>() == -30.0f);
-		CHECK(Literal::construct(tokens[2], Literal::kFloat).get<double>() == -30.0);
-		CHECK_THROWS(Literal::construct(tokens[3], Literal::kFloat).get<double>());
-		tokens.clear(); errors.clear();
-	}
-	SECTION("Boolean Literal"){
-		REQUIRE(lex("true false null", tokens, errors));
-		REQUIRE(errors.size() == 0);
-		CHECK(Literal::construct(tokens[0], Literal::kBoolean).get<bool>() == true);
-		CHECK(Literal::construct(tokens[1], Literal::kBoolean).get<bool>() == false);
-		CHECK_THROWS(Literal::construct(tokens[2], Literal::kBoolean).get<bool>());
-		tokens.clear(); errors.clear();
-	}
-	SECTION("String Literal"){
-		REQUIRE(lex("\"Hello \" \"World\" null", tokens, errors));
-		REQUIRE(errors.size() == 0);
-		CHECK(Literal::construct(tokens[0], Literal::kString).get<std::string>() == "\"Hello World\"");
-		CHECK_THROWS(Literal::construct(tokens[1], Literal::kString).get<std::string>());
-		tokens.clear(); errors.clear();
-	}
-
-
 }
 
 TEST_CASE("Parser", "[parser]"){
-	using namespace openddl::detail;
-	std::vector<Token> tokens;
-	std::vector<Error> errors;
-	REQUIRE(lex("float $apex {3.0}", tokens, errors));
-	REQUIRE(errors.size() == 0);
-	REQUIRE(parse(tokens, errors));
+	
 }
