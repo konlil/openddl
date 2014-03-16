@@ -83,44 +83,46 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="catch.hpp" />
-    <ClInclude Include="Literal.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Structure.h" />
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="detail.h" />
+    <ClInclude Include="detail\Command.h" />
+    <ClInclude Include="detail\LiteralHelpers.h" />
+    <ClInclude Include="detail\Error.h" />
+    <ClInclude Include="detail\LexerContext.h" />
+    <ClInclude Include="detail\ParserContext.h" />
+    <ClInclude Include="detail\Token.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="detail.cpp" />
-    <ClCompile Include="LexerContext.cpp" />
-    <ClCompile Include="Literal.cpp" />
-    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="detail\Lexer.cpp" />
+    <ClCompile Include="detail\LiteralHelpers.cpp" />
+    <ClCompile Include="detail\Parser.cpp" />
+    <ClCompile Include="detail\LexerContext.cpp" />
+    <ClCompile Include="detail\ParserContext.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="Lexer.cpp" />
-    <ClCompile Include="Structure.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="Ragel/Lexer.rl">
+    <CustomBuild Include="detail/Ragel/Lexer.rl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</DeploymentContent>
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o .\%(Filename).cpp</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o .\%(Filename).cpp</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o detail\%(Filename).cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o detail\%(Filename).cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">detail\%(Filename).cpp</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Ragel Compile: %(Filename).rl</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Ragel Compile: %{Filename}.rl</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">detail\%(Filename).cpp</Outputs>
     </CustomBuild>
-    <CustomBuild Include="Ragel/Parser.rl">
+    <CustomBuild Include="detail/Ragel/Parser.rl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</DeploymentContent>
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o .\%(Filename).cpp</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o .\%(Filename).cpp</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o detail/%(Filename).cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o detail/%(Filename).cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">detail/%(Filename).cpp</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Ragel Compile: %(Filename).rl</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Ragel Compile: %{Filename}.rl</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">detail/%(Filename).cpp</Outputs>
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

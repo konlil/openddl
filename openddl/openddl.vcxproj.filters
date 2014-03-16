@@ -13,8 +13,14 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Ragel">
-      <UniqueIdentifier>{a0b47015-22ba-4cbb-86fb-04796af67a6c}</UniqueIdentifier>
+    <Filter Include="Source Files\detail">
+      <UniqueIdentifier>{1b6d06e1-d32f-4852-a9f4-a93cba8061d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\detail">
+      <UniqueIdentifier>{784e9dc3-a7cc-46a3-9eae-b869a4be74dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\detail\Ragel">
+      <UniqueIdentifier>{f1d7d404-4a0f-4789-98ab-3ecc4e2e198a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,48 +33,54 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Literal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="catch.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Structure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="detail.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="detail\LexerContext.h">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="detail\Error.h">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="detail\Token.h">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="detail\Command.h">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="detail\ParserContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="detail\LiteralHelpers.h">
+      <Filter>Header Files\detail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Lexer.cpp">
+    <ClCompile Include="detail\LexerContext.cpp">
+      <Filter>Source Files\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="detail\Lexer.cpp">
+      <Filter>Source Files\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="detail\Parser.cpp">
+      <Filter>Source Files\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="detail\ParserContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Literal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LexerContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Structure.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="detail.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Parser.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="detail\LiteralHelpers.cpp">
+      <Filter>Source Files\detail</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="Ragel/Lexer.rl">
-      <Filter>Ragel</Filter>
+    <CustomBuild Include="detail/Ragel/Lexer.rl">
+      <Filter>Source Files\detail\Ragel</Filter>
     </CustomBuild>
-    <CustomBuild Include="Ragel/Parser.rl">
-      <Filter>Ragel</Filter>
+    <CustomBuild Include="detail/Ragel/Parser.rl">
+      <Filter>Source Files\detail\Ragel</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>
