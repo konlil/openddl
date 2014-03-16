@@ -3,8 +3,9 @@
 // Licensed under MIT License
 //================================================================================================================
 
-#include "stdafx.h"
-#include "detail.h"
+#include "..\stdafx.h"
+#include "..\detail.h"
+#include "LexerContext.h"
 
 #define error(m) context.lex_error(m,ts,te)
 
