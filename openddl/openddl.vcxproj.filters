@@ -68,10 +68,10 @@
     <ClCompile Include="detail\Parser.cpp">
       <Filter>Source Files\detail</Filter>
     </ClCompile>
-    <ClCompile Include="detail\ParserContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="detail\LiteralHelpers.cpp">
+      <Filter>Source Files\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="detail\ParserContext.cpp">
       <Filter>Source Files\detail</Filter>
     </ClCompile>
   </ItemGroup>

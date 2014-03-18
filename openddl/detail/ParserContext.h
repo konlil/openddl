@@ -10,31 +10,34 @@ namespace openddl
 	{
 		struct ParserContext
 		{
-
+		public:
 			ParserContext(const std::vector<Token> & tokens, std::vector<Command> & commands, std::vector<Error> & errors);
 			const std::vector<Token> & tokens; 
 			std::vector<Command> & commands; 
 			std::vector<Error> & errors;
-		private:
-			std::vector<Command::LiteralPayload> literals;
-			std::vector<std::string> reference;
-			Token const * element_type;
-			unsigned int element_count;
-			bool reference_error;
+		
+
+			std::vector<int> parents;
+			
 
 		public:
 
-			void push_literal(const Token * t,Command::LiteralPayload::encoding_t encoding);
+			void push_list_type(Token const * type, Token const * name = nullptr);
+			//Used with
+			void push_literal_list(Command::LiteralPayload::encoding_t encoding,Token const * ts, Token const * te);
+
 			
-			void build_reference(const Token * t);	//Used to push each component of the reference into array.
-			void push_reference();					//Used to push built reference into command stream
-
+			void push_array_type(Token const * type, Token const * dimensions, Token const * name = nullptr);
 			void push_array_element();
-			void push_data_list(Token const * type);
-			void end_data_list();
-			void push_data_array_list(const Token * type, const Token * dimensions);
-			void end_data_array_list();
+			void end_array();
 
+
+			void push_structure(Token const * identifier, Token const * name = nullptr);
+			void push_property(Token const * ts, Token const * te);
+			void end_structure();
+
+		private:
+			int build_literal(Command::LiteralPayload::encoding_t encoding, Token const * ts, Token const * te, Command::LiteralPayload & payload);
 		};
 	}
 }

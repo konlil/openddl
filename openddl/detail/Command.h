@@ -9,11 +9,14 @@ namespace openddl
 	{
 		struct Command
 		{
+
+			//Assume ownership of all members
 			struct StructurePayload
 			{
-				//Do not assume ownership of identifier/name
 				std::string * identifier;
 				std::string * name;
+				unsigned int properties;
+				unsigned int children;
 			};
 			struct DataListPayload
 			{
@@ -33,9 +36,9 @@ namespace openddl
 				unsigned int length;
 				unsigned int dimension;
 			};
+			
 			struct LiteralPayload
 			{
-				//Assume ownership of string_/reference_ members
 				union {
 					std::string * string_;
 					std::vector<std::string> * reference_;
@@ -47,18 +50,32 @@ namespace openddl
 				enum encoding_t { kString, kReference, kInteger, kFloat, kBoolean, kType };
 				encoding_t encoding;
 			};
+			struct PropertyPayload
+			{
+				std::string * identifier;
+				enum {kHex,kBinary,kCharacter,kDecimal,kFloat,kBool,kString,kReference,kDataType} encoding;
+				union {
+					std::string * string_;
+					std::string * numeric_;
+					Type type_;
+					std::vector<std::string> * reference_;
+					bool boolean_;
+				} value;
+					
+			};
 
-			union _payload {
+			union {
 				StructurePayload structure_;
 				DataListPayload list_;
 				DataArrayPayload array_;
 				ArrayElementPayload element_;
 				LiteralPayload literal_;
-			};
+				PropertyPayload property_;
+			} payload;
 
-			enum { kStructure, kDataList, kDataArray, kArrayElement, kLiteral } type;
-			_payload payload;
-			unsigned int next;
+			enum { kStructure, kDataList, kDataArray, kArrayElement, kLiteral, kProperty } type;
+			int parent;
+
 		};
 	}
 }

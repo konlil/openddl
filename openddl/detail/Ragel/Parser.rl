@@ -8,91 +8,89 @@ using namespace openddl::detail;
 	machine Parser;
 	getkey fpc->token_type;
 	write data;
-
-	action on_integer_literal{
-		context.push_literal(p,Command::LiteralPayload::encoding_t::kInteger);
-	}
-	action on_float_literal{
-		context.push_literal(p,Command::LiteralPayload::encoding_t::kFloat);
-	}
-	action on_bool_literal{
-		context.push_literal(p,Command::LiteralPayload::encoding_t::kBoolean);
-	}
-	action on_string_literal{
-		context.push_literal(p,Command::LiteralPayload::encoding_t::kString);
-	}
-	action on_type_literal{
-		context.push_literal(p,Command::LiteralPayload::encoding_t::kType);
-	}
-	action build_reference{
-		context.build_reference(p);
-	}
-	action on_reference_literal{
-		context.push_reference();
-	}
-
-	action on_data_list_start{
-		context.push_data_list(p);
-	}
-	action on_data_list_end{
-		context.end_data_list();
-	}
 	
-	s_lsquare = 1;
-	s_rsquare = 2;
-	s_comma = 3;
-	s_lbrace = 4;
-	s_rbrace = 5;
-	s_equals = 6;
-	w_identifier = 7;
-	w_name = 8;
-	w_null = 9;
-	
-	l_bool = 10;
-	l_float = 11;
-	l_hex = 12;
-	l_decimal = 13;
-	l_binary = 14;
-	l_string = 15;
-	l_character = 16;
+	left_square = 1;
+	right_square = 2;
+	comma = 3;
+	left_brace = 4;
+	right_brace = 5;
+	equals = 6;
+	identifier = 7;
+	local_name = 8;
+	global_name = 9;
+	null_name = 10;
 
-	t_float = 17..18;
-	t_integer = 19..26;
 
-	t_ref = 27;
-	t_bool = 28;
-	t_string = 29;
-	t_type = 30;
+	float_type = 18..19;
+	integer_type = 20..27;
+
+	ref_type = 28;
+	bool_type = 29;
+	string_type = 30;
+	type_type = 31;
 	
 
 	#Literal rules
-	boolean_literal = l_bool;
-	integer_literal = l_character | l_hex | l_decimal | l_binary;
-	float_literal = l_float | l_decimal | l_hex | l_binary;
-	string_literal = l_string;
-	reference = (w_null | w_name+) $build_reference %on_reference_literal;
-	data_type = t_integer | t_float | t_ref | t_string | t_bool | t_type;
+	boolean_literal = 11;
+	integer_literal = 17 | 13 | 14 | 15;
+	float_literal = 12 | 14 | 13 | 15;
+	string_literal = 16;
+	data_type = integer_type | float_type | ref_type | string_type | bool_type | type_type;
 	
-	boolean_list = (boolean_literal (s_comma boolean_literal)*) @on_bool_literal;
-	integer_list = (integer_literal (s_comma integer_literal)*) @on_integer_literal;
-	float_list = (float_literal (s_comma float_literal)*) @on_float_literal;
-	string_list = (string_literal (s_comma string_literal)*) @on_string_literal;
-	reference_list = (reference (s_comma reference)*);
-	data_type_list = (data_type (s_comma data_type)*) @on_type_literal;
+	name = global_name | local_name;
+	reference = null_name | local_name+ | global_name (local_name)*;
 
-	float_literal_list = t_float w_name? s_lbrace float_list s_rbrace;
-	integer_literal_list = t_integer w_name? s_lbrace integer_list s_rbrace;
-	boolean_literal_list = t_bool w_name? s_lbrace boolean_list s_rbrace;
-	string_literal_list = t_string w_name? s_lbrace string_list s_rbrace;
-	reference_literal_list = t_ref w_name? s_lbrace reference_list s_rbrace;
-	data_type_literal_list = t_type w_name? s_lbrace data_type_list s_rbrace;
+	property = identifier equals (boolean_literal|integer_literal|float_literal|string_literal|reference|data_type);
 
-	data_list = (float_literal_list | integer_literal_list | boolean_literal_list | string_literal_list | reference_literal_list | data_type_literal_list) >on_data_list_start @on_data_list_end;
+	array_notation = data_type left_square integer_literal right_square;
 
-	array_data_type = data_type s_lsquare integer_literal s_rsquare;
-
-	#data_array_list = array_data_type (w_name? $!on_expected_name) s_lbrace element_list (s_comma element_list)* s_rbrace @on_data_array_list;
-	main := data_list*;
+	literal_sequence := |*
+		left_brace boolean_literal (comma boolean_literal)* right_brace => {context.push_literal_list(Command::LiteralPayload::kBoolean,ts,te); fret;};
+		left_brace integer_literal (comma integer_literal)* right_brace => {context.push_literal_list(Command::LiteralPayload::kInteger,ts,te); fret;};
+		left_brace float_literal (comma float_literal)* right_brace => {context.push_literal_list(Command::LiteralPayload::kFloat,ts,te); fret;};
+		left_brace string_literal (comma string_literal)* right_brace => {context.push_literal_list(Command::LiteralPayload::kString,ts,te); fret;};
+		left_brace reference (comma reference)* right_brace => {context.push_literal_list(Command::LiteralPayload::kReference,ts,te); fret;};
+		left_brace data_type (comma data_type)* right_brace => {context.push_literal_list(Command::LiteralPayload::kType,ts,te); fret;};
+	*|;
+	data_array := |*
+		left_brace => { context.push_array_element(); fhold; fcall literal_sequence;};
+		#comma => { context.push_array_element(); fcall literal_sequence;};
+		comma;
+		right_brace => { context.end_array(); fret;};
+		
+	*|;
+	structure_property_list := |* 
+		property (comma|right_brace) => { context.push_property(ts,te-1); fhold;};
+		comma;
+		right_brace left_brace => {fgoto structure;};
+		(data_type | identifier) => {fhold; fgoto structure;};
+		left_brace right_brace left_brace => { fgoto structure;};
+		left_brace;
+	*|;
+	structure := |*	
+		data_type name? left_brace => { 
+			if((te-ts)==3)
+				context.push_list_type(ts,ts+1);
+			else if((te-ts)==2)
+				context.push_list_type(ts);
+			fhold; fcall literal_sequence; 
+		};
+		array_notation name? left_brace => {
+			if((te-ts)==6)
+				context.push_array_type(ts,ts+2,ts+4);
+			else if((te-ts)==5)
+				context.push_array_type(ts,ts+2);
+			fcall data_array;
+		};
+		identifier name? left_brace=> { 
+				if((te-ts) == 3)
+					context.push_structure(ts,ts+1); 
+				else if((te-ts)==2)
+					context.push_structure(ts);
+				fhold; fcall structure_property_list;
+				};
+		right_brace => {if(top!=0) { context.end_structure(); fret;}};
+	*|;
 	
 }%%
 
@@ -106,13 +104,17 @@ bool openddl::detail::parse(const std::vector<Token> & tokens, std::vector<Comma
 	Token const *eof = pe;
 
 	//State
-	int cs = 0, act, have = 0;
-	Token const *ts = 0; 
-	Token const *te = 0;
+	int cs = 0, act,have = 0;
+	int top;
+	int stack[32];
+
 	int done = 0;
 
+	Token const *ts;
+	Token const *te;
 	
 	%% write init;
 	%% write exec;
+
 	return p==pe && errors.empty();
 }

@@ -1,85 +1,315 @@
 #include "ParserContext.h"
 #include "LiteralHelpers.h"
-#include <iostream>
+#include <cstdint>
+
+
+
+bool encoding_mismatch(openddl::Type type, openddl::detail::Command::LiteralPayload::encoding_t encoding)
+{
+	using openddl::detail::Command;
+	using openddl::Type;
+	switch (type)
+	{
+	case Type::kInt8:
+	case Type::kInt16:
+	case Type::kInt32:
+	case Type::kInt64:
+	case Type::kUnsignedInt8:
+	case Type::kUnsignedInt16:
+	case Type::kUnsignedInt32:
+	case Type::kUnsignedInt64:
+		if (encoding == Command::LiteralPayload::kInteger) return false; else return true;
+	case Type::kBool:
+		if (encoding == Command::LiteralPayload::kBoolean) return false; else return true;
+	case Type::kDouble:
+	case Type::kFloat:
+		if (encoding == Command::LiteralPayload::kFloat) return false; else return true;
+	case Type::kRef:
+		if (encoding == Command::LiteralPayload::kReference) return false; else return true;
+	case Type::kString:
+		if (encoding == Command::LiteralPayload::kString) return false; else return true;
+	case Type::kType:
+		if (encoding == Command::LiteralPayload::kType) return false; else return true;
+	default:
+		return true;
+	}
+}
 
 openddl::detail::ParserContext::ParserContext(const std::vector<Token> & tokens, std::vector<Command> & commands, std::vector<Error> & errors)
-: tokens(tokens), commands(commands), errors(errors), reference_error(false)
+: tokens(tokens), commands(commands), errors(errors)
 {
 }
 
-void openddl::detail::ParserContext::push_literal(const Token * t, Command::LiteralPayload::encoding_t encoding)
+int openddl::detail::ParserContext::build_literal(Command::LiteralPayload::encoding_t encoding, Token const * ts, Token const * te, Command::LiteralPayload & payload)
 {
-
-	Command::LiteralPayload payload;
 	payload.encoding = encoding;
-	int error = 0;
-	if(decode_literal(*t, payload) && (error = detect_limits(convert(*element_type),payload)) == 0)
-		literals.push_back(payload);
+	
+	if (encoding == Command::LiteralPayload::kReference)
+	{
+		Token const * i = ts;
+		std::vector<std::string> * reference = new std::vector<std::string>();
+		while (i <= te && (i->token_type == Token::kNull || i->token_type == Token::kGlobalName || i->token_type == Token::kLocalName))
+		{
+			reference->emplace_back(i->payload);
+			i++;
+		}
+		payload.value.reference_ = reference;
+		return i - ts;
+	}
 	else
 	{
+		Type type;
+		Command * parent = &commands[parents.back()];
+		if (parent->type == Command::kDataList)
+			type = parent->payload.list_.type;
+		else if (parent->type == Command::kArrayElement)
+		{
+			type = commands[parent->parent].payload.array_.type;
+		}
+		int error = 0;
+		if (!decode_literal(*ts, payload) && (error = detect_limits(type,payload)) != 0)
+		{
+			Error e;
+			if (error == -1)
+				e.message = "semantic.literal.underflow";
+			else if (error == 1)
+				e.message = "semantic.literal.overflow";
+			else
+				e.message = "parse.literal.out_of_range";
+			e.payload = ts->payload;
+			errors.push_back(e);
+		}
+		return 1;
+	}
+}
+void openddl::detail::ParserContext::push_list_type(Token const * type, Token const * name)
+{
+	Command c;
+	c.type = Command::kDataList;
+	c.payload.list_.type = convert(*type);
+	if (parents.empty())
+		c.parent = -1;
+	else
+	{
+		c.parent = parents.back();
+		if (commands[parents.back()].type == Command::kStructure)
+			commands[parents.back()].payload.structure_.children++;
+	}
+	if (name)
+		c.payload.list_.name = new std::string(name->payload);
+	commands.push_back(c);
+	parents.push_back(commands.size()-1);
+}
+
+void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::encoding_t encoding, Token const * ts, Token const * te)
+{
+	Command c;
+	c.type = Command::kLiteral;
+	c.parent = commands.size() - 1;
+	Command::LiteralPayload payload;
+
+	Token const * i = ts + 1;
+	while (i < te - 1)
+	{
+		i += build_literal(encoding, i, te - 1, payload) + 1;
+		c.payload.literal_ = payload;
+		commands.push_back(c);
+	}
+
+	Command * parent = &commands[parents.back()];
+	Type type;
+	Command::LiteralPayload::encoding_t e = commands.back().payload.literal_.encoding;
+	if (parent->type == Command::kDataList)
+	{	
+		parent->payload.list_.length = &commands.back()-parent;
+		type = parent->payload.list_.type;
+
+	}
+	else if (parent->type == Command::kArrayElement)
+	{
+
+		parent->payload.element_.length = &commands.back() - parent;
+		type = commands[parent->parent].payload.array_.type;
+	}
+	if (encoding_mismatch(type, e))
+	{
 		Error e;
-		e.payload = t->payload;
-		if (error > 0)
-			e.message = "semantic.literal_limits(" + element_type->payload + ").overflow";
-		else if (error < 0)
-			e.message = "semantic.literal_limits(" + element_type->payload + ").underflow";
-		else
-			e.message = "parse.literal.out_of_range";
+		e.message = "semantic.literal.type_mismatch";
 		errors.push_back(e);
 	}
 	
+	parents.pop_back();
+
 }
 
-void openddl::detail::ParserContext::build_reference(const Token * t)
+void openddl::detail::ParserContext::push_array_type(Token const * type, Token const * dimensions, Token const * name)
 {
-	if (!reference.empty() && t->payload[0] != '%')
-		reference_error = true;
-	reference.push_back(t->payload);
-}
-
-void openddl::detail::ParserContext::push_reference()
-{
-	if (reference_error)
+	Command c;
+	c.type = Command::kDataArray;
+	c.payload.array_.type = convert(*type);
+	c.payload.array_.length = 0;
+	if (parents.empty())
+		c.parent = -1;
+	else
+	{
+		c.parent = &commands[parents.back()] - commands.data();
+		if (commands[parents.back()].type == Command::kStructure)
+			commands[parents.back()].payload.structure_.children++;
+	}
+		
+	if (name != nullptr)
+		c.payload.array_.name = new std::string(name->payload);
+	else
+		name = nullptr;
+	Command::LiteralPayload dimension_size;
+	dimension_size.encoding = Command::LiteralPayload::kInteger;
+	int error = 0;
+	if (!decode_literal(*dimensions, dimension_size) && (error = detect_limits(Type::kUnsignedInt32, dimension_size)) != 0)
 	{
 		Error e;
-		std::string payload;
-		for (auto & p : reference)
-			payload += p + " ";
-		payload.pop_back();
-		e.payload = payload;
-		e.message = "parse.literal.reference.illegal_global_name";
+		
+		if (error == -1)
+			e.message = "semantic.array.size_negative";
+		else
+			e.message = "semantic.array.size_invalid";
+		e.payload = dimensions->payload;
 		errors.push_back(e);
+		c.payload.array_.dimension = 0;
 	}
 	else
 	{
-		Command::LiteralPayload payload;
-		payload.encoding = Command::LiteralPayload::kReference;
-		payload.value.reference_ = new std::vector<std::string>(reference);
-		literals.push_back(payload);
+		if (dimension_size.value.integer_.value == 0)
+		{
+			Error e;
+			e.message = "semantic.array.size_zero";
+			errors.push_back(e);
+		}
+			
+		c.payload.array_.dimension = (uint32_t)dimension_size.value.integer_.value;
 	}
-	reference.clear();
-	reference_error = false;
+	commands.push_back(c);
+	parents.push_back(commands.size() - 1);
+	
 }
 
-void openddl::detail::ParserContext::push_data_list(Token const * type)
+void openddl::detail::ParserContext::push_array_element()
 {
-	element_type = type;
+	Command & parent = commands[parents.back()];
+	Command c;
+	c.type = Command::kArrayElement;
+	c.parent = parents.back();
+	c.payload.element_.subindex = parent.payload.array_.length;
+	parent.payload.array_.length++;
+	c.payload.element_.length = 0;
+	commands.push_back(c);
+	parents.push_back(commands.size() - 1);
 }
-void openddl::detail::ParserContext::end_data_list()
+
+void openddl::detail::ParserContext::end_array()
 {
-	Command::DataListPayload payload;
-	payload.type = convert(*element_type);
-	payload.length = literals.size();
-	payload.name = nullptr;
-	Command command;
-	command.type = Command::kDataList;
-	command.payload.list_ = payload;
-	commands.push_back(command);
-	command.type = Command::kLiteral;
-	for (auto & l : literals)
+	Command * c = &commands[parents.back()];
+	int count = c->payload.array_.length;
+	int size = c->payload.array_.dimension;
+	
+	//Check to ensure all sub arrays in list are of specified size;
+	//Don't bother if size == 0 as this case has already been handled
+	if (size != 0)
 	{
-		command.payload.literal_ = l;
-		commands.push_back(command);
+		c += 1;
+		for (int i = 0; i < count; i++)
+		{
+			if (c->payload.element_.length != size)
+			{
+				Error e;
+				e.message = "semantic.array.size_mismatch";
+				errors.push_back(e);
+				break;
+			}
+			c += c->payload.element_.length+1;
+		}		
 	}
-	literals.clear();
+	parents.pop_back();
+}
+
+void openddl::detail::ParserContext::push_structure(Token const * identifier, Token const * name)
+{
+	Command c;
+	c.type = Command::kStructure;
+	if (parents.empty())
+		c.parent = -1;
+	else
+	{
+		c.parent = parents.back();
+		if (commands[parents.back()].type == Command::kStructure)
+			commands[parents.back()].payload.structure_.children++;
+	}
+		
+	c.payload.structure_.identifier = new std::string(identifier->payload);
+	if (name != nullptr)
+		c.payload.structure_.name = new std::string(name->payload);
+	else
+		c.payload.structure_.name = nullptr;
+	c.payload.structure_.properties = 0;
+	c.payload.structure_.children = 0;
+	commands.push_back(c);
+	parents.push_back(commands.size() - 1);
+}
+void openddl::detail::ParserContext::push_property(Token const *ts, Token const * te)
+{
+	Command c;
+	c.type = Command::kProperty;
+	c.parent = parents.back();
+	c.payload.property_.identifier = new std::string(ts->payload);
+	Token const *value = ts + 1;
+	switch (value->token_type)
+	{
+	case Token::kBinaryLiteral:
+		c.payload.property_.encoding = Command::PropertyPayload::kBinary; 
+		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		break;
+	case Token::kHexLiteral:
+		c.payload.property_.encoding = Command::PropertyPayload::kHex; 
+		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		break;
+	case Token::kCharacterLiteral:
+		c.payload.property_.encoding = Command::PropertyPayload::kCharacter; 
+		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		break;
+	case Token::kDecimalLiteral:
+		c.payload.property_.encoding = Command::PropertyPayload::kDecimal; 
+		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		break;
+	case Token::kFloatLiteral:
+		c.payload.property_.encoding = Command::PropertyPayload::kFloat; 
+		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		break;
+	case Token::kStringLiteral:
+		c.payload.property_.encoding = Command::PropertyPayload::kString;
+		c.payload.property_.value.string_ = new std::string(value->payload);
+		break;
+	case Token::kBooleanLiteral:
+		c.payload.property_.encoding = Command::PropertyPayload::kBool;
+		c.payload.property_.value.boolean_ = "true" ? true : false;
+		break;
+	case Token::kType:
+		c.payload.property_.encoding = Command::PropertyPayload::kDataType;
+		c.payload.property_.value.type_ = convert(*value);
+		break;
+	
+	case Token::kNull:
+	case Token::kGlobalName:
+	case Token::kLocalName:
+		c.payload.property_.encoding = Command::PropertyPayload::kReference;
+		std::vector<std::string> * reference = new std::vector<std::string>();
+		for (Token const * i = value; i <= te; i++)
+			reference->emplace_back(i->payload);
+		c.payload.property_.value.reference_ = reference;
+		break;
+	}
+	commands[parents.back()].payload.structure_.properties++;
+	commands.push_back(c);
+}
+void openddl::detail::ParserContext::end_structure()
+{
+	parents.pop_back();
 }

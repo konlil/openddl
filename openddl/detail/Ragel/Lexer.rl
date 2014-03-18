@@ -87,7 +87,8 @@
 		bool_literal		=>	{ token(Token::kBooleanLiteral);};
 
 		# Name
-		name				=>	{ token(Token::kName);};
+		'%' identifier		=>	{ token(Token::kLocalName);};
+		'$' identifier		=>	{ token(Token::kGlobalName);};
 		identifier			=>	{ token(Token::kIdentifier);};
 		'null'				=>	{ token(Token::kNull);};
 

@@ -21,6 +21,7 @@ openddl::Type openddl::detail::convert(const openddl::detail::Token & t)
 	case Token::kString: return Type::kString;
 	case Token::kType: return Type::kType;
 	}
+	throw std::out_of_range("Token enum was not type value");
 }
 void openddl::detail::encode_utf8(std::string & out, const char32_t token)
 {
@@ -240,7 +241,7 @@ bool openddl::detail::decode_literal(const openddl::detail::Token & t, openddl::
 		catch (std::out_of_range &) { return false; }
 		break;
 	case Command::LiteralPayload::kString:
-		payload.value.string_ = escape_string(t.payload);
+		payload.value.string_ = new std::string(t.payload);
 		break;
 	}
 	return true;
