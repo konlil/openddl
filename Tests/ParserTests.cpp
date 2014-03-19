@@ -4,7 +4,7 @@
 #include "../openddl/detail/Command.h"
 #include "../openddl/detail/Token.h"
 #include "../openddl/detail/Error.h"
-/*
+
 TEST_CASE("Parsing Data Lists", "[parse]"){
 	
 	GIVEN("Valid OpenDDL literal lists"){
@@ -188,7 +188,7 @@ TEST_CASE("Parsing Data List Array", "[parse]"){
 	}
 
 }
-*/
+
 TEST_CASE("Parsing nested data structures", "[parse]"){
 	GIVEN("Empty OpenDDL structures"){
 		std::string input = "Hello {} Hello $name {} Hello {}{}";
