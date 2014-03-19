@@ -38,7 +38,9 @@ namespace openddl
 				kRef,
 				kBool,
 				kString,
-				kType
+				kType,
+				kLeftBracket,
+				kRightBracket
 			};
 
 			token_t		token_type;

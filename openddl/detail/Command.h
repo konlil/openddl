@@ -75,6 +75,7 @@ namespace openddl
 
 			enum { kStructure, kDataList, kDataArray, kArrayElement, kLiteral, kProperty } type;
 			int parent;
+			int depth;
 
 		};
 	}

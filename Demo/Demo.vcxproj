@@ -82,6 +82,9 @@
   <ItemGroup>
     <ClCompile Include="Demo.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="input.oddl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

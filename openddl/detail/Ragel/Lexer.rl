@@ -127,6 +127,8 @@
 
 		# Structural characters
 		',' =>						{ token(Token::kComma);};
+		'(' =>						{ token(Token::kLeftBracket);};
+		')' =>						{ token(Token::kRightBracket);};
 		'{' =>						{ token(Token::kLeftBrace);};
 		'}' =>						{ token(Token::kRightBrace);};
 		'['	=>						{ token(Token::kLeftSquareBracket);};

@@ -6,28 +6,12 @@ using namespace openddl::detail;
 %%{
 	
 	machine Parser;
-	getkey fpc->token_type;
+	getkey p->token_type;
 	write data;
-	
-	action end_of_file {
-		Error e;
-		e.message = "parse.unexpected_end_of_file";
-		errors.push_back(e);
-	}
-	action data_list_error{
-		if(p!=pe)
-		{
 
-			Error e;
-			if(p->token_type == (p-1)->token_type)
-				e.message = "parse.data_list.missing_comma";
-			else if((p-1)->token_type == Token::kComma && (p-2)->token_type != p->token_type)
-				e.message = "semantic.literal.type_mismatch";
-			else
-				e.message = "parse.panic.unknown_error";
-			errors.push_back(e);
-		}
-		
+	prepush {
+		if(top > stack.capacity())
+			stack.resize(stack.capacity()*2,-1);
 	}
 
 	left_square = 1;
@@ -49,6 +33,9 @@ using namespace openddl::detail;
 	bool_type = 29;
 	string_type = 30;
 	type_type = 31;
+
+	left_bracket = 32;
+	right_bracket = 33;
 	
 
 	#Literal rules
@@ -88,13 +75,12 @@ using namespace openddl::detail;
 		
 	*|;
 	structure_property_list := |* 
-		property (comma|right_brace) => { context.push_property(ts,te-1); fhold;};
+		property (comma|right_bracket) => { context.push_property(ts,te-1); fhold;};
 		comma;
-		right_brace => { fhold; fgoto structure;};
-		right_brace left_brace => {fgoto structure;};
+		right_bracket left_brace => {fgoto structure;};
 		(data_type | identifier) => {fhold; fgoto structure;};
-		left_brace right_brace left_brace => { fgoto structure;};
-		left_brace;
+		left_bracket right_bracket left_brace => { fgoto structure;};
+		left_bracket;
 	*|;
 	structure := |*	
 		data_type name? left_brace => { 
@@ -111,7 +97,14 @@ using namespace openddl::detail;
 				context.push_array_type(ts,ts+2);
 			fcall data_array;
 		};
-		identifier name? left_brace=> { 
+		identifier name? left_brace => {
+			if((te-ts) == 3)
+				context.push_structure(ts,ts+1); 
+			else if((te-ts)==2)
+				context.push_structure(ts);
+			fcall structure;
+		};
+		identifier name? left_bracket => { 
 				if((te-ts) == 3)
 					context.push_structure(ts,ts+1); 
 				else if((te-ts)==2)
@@ -137,7 +130,7 @@ bool openddl::detail::parse(const std::vector<Token> & tokens, std::vector<Comma
 	//State
 	int cs = 0, act,have = 0;
 	int top;
-	int stack[32];
+	std::vector<int> stack(32);
 
 	int done = 0;
 
@@ -146,6 +139,7 @@ bool openddl::detail::parse(const std::vector<Token> & tokens, std::vector<Comma
 	
 	%% write init;
 	%% write exec;
+
 	if(top != 0)
 	{
 		Error e;

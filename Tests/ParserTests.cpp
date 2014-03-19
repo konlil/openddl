@@ -5,6 +5,7 @@
 #include "../openddl/detail/Token.h"
 #include "../openddl/detail/Error.h"
 
+
 TEST_CASE("Parsing Data Lists", "[parse]"){
 	
 	GIVEN("Valid OpenDDL literal lists"){
@@ -189,9 +190,10 @@ TEST_CASE("Parsing Data List Array", "[parse]"){
 
 }
 
-TEST_CASE("Parsing nested data structures", "[parse]"){
+TEST_CASE("Parsing data structures", "[parse]"){
+
 	GIVEN("Empty OpenDDL structures"){
-		std::string input = "Hello {} Hello $name {} Hello {}{}";
+		std::string input = "Hello {} Hello $name {} Hello (){}";
 		std::vector<openddl::detail::Error> errors;
 		std::vector<openddl::detail::Token> tokens;
 		std::vector<openddl::detail::Command> commands;
@@ -209,8 +211,27 @@ TEST_CASE("Parsing nested data structures", "[parse]"){
 			}
 		}
 	}
+	GIVEN("Nested OpenDDL structures"){
+		std::string input = "Hello { Hello { int8{1} } } ";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		std::vector<openddl::detail::Command> commands;
+		WHEN("the string is parsed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("should have no errors"){
+				REQUIRE(errors.empty());
+				AND_WHEN("the token stream is parsed"){
+					REQUIRE(openddl::detail::parse(tokens, commands, errors));
+					THEN("should have no errors"){
+						REQUIRE(errors.empty());
+						REQUIRE(commands.size() == 4);
+					}
+				}
+			}
+		}
+	}
 	GIVEN("OpenDDL Structures with properties"){
-		std::string input = "Hello {hello = true}{} Hello {hello = true,goodbye = 'abcd'}{}  Hello $name {}{}";
+		std::string input = "Hello (hello = true){} Hello (hello = true,goodbye = 'abcd'){}  Hello $name (){}";
 		std::vector<openddl::detail::Error> errors;
 		std::vector<openddl::detail::Token> tokens;
 		std::vector<openddl::detail::Command> commands;
@@ -246,8 +267,28 @@ TEST_CASE("Parsing nested data structures", "[parse]"){
 			}
 		}
 	}
+
 	GIVEN("Unterminated OpenDDL structure"){
-		std::string input = "Hello {} {";
+		std::string input = "Hello () {";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		std::vector<openddl::detail::Command> commands;
+		WHEN("the string is parsed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("should have no errors"){
+				REQUIRE(errors.empty());
+				AND_WHEN("the token stream is parsed"){
+					REQUIRE_FALSE(openddl::detail::parse(tokens, commands, errors));
+					THEN("should have errors"){
+						REQUIRE_FALSE(errors.empty());
+						CHECK(errors[0].message == "parse.unexpected_end_of_file");
+					}
+				}
+			}
+		}
+	}
+	GIVEN("Unterminated Property Array"){
+		std::string input = "Hello (";
 		std::vector<openddl::detail::Error> errors;
 		std::vector<openddl::detail::Token> tokens;
 		std::vector<openddl::detail::Command> commands;

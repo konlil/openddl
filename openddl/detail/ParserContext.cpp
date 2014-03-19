@@ -135,6 +135,7 @@ int openddl::detail::ParserContext::build_literal(Command::LiteralPayload::encod
 void openddl::detail::ParserContext::push_list_type(Token const * type, Token const * name)
 {
 	Command c;
+	c.depth = parents.size();
 	c.type = Command::kDataList;
 	c.payload.list_.type = convert(*type);
 	if (parents.empty())
@@ -169,6 +170,7 @@ void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::
 	Command c;
 	c.type = Command::kLiteral;
 	c.parent = commands.size() - 1;
+	c.depth = parents.size();
 	Command::LiteralPayload payload;
 
 	Token const * i = ts + 1;
@@ -177,6 +179,7 @@ void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::
 		i += build_literal(encoding, i, te - 1, payload) + 1;
 		c.payload.literal_ = payload;
 		commands.push_back(c);
+		
 	}
 
 	{
@@ -204,6 +207,7 @@ void openddl::detail::ParserContext::push_array_type(Token const * type, Token c
 {
 	Command c;
 	c.type = Command::kDataArray;
+	c.depth = parents.size();
 	c.payload.array_.type = convert(*type);
 	c.payload.array_.length = 0;
 	if (parents.empty())
@@ -248,12 +252,14 @@ void openddl::detail::ParserContext::push_array_type(Token const * type, Token c
 	commands.push_back(c);
 	parents.push_back(commands.size() - 1);
 	
+	
 }
 
 void openddl::detail::ParserContext::push_array_element()
 {
 	Command & parent = commands[parents.back()];
 	Command c;
+	c.depth = parents.size();
 	c.type = Command::kArrayElement;
 	c.parent = parents.back();
 	c.payload.element_.subindex = parent.payload.array_.length;
@@ -292,6 +298,7 @@ void openddl::detail::ParserContext::end_array()
 void openddl::detail::ParserContext::push_structure(Token const * identifier, Token const * name)
 {
 	Command c;
+	c.depth = parents.size();
 	c.type = Command::kStructure;
 	if (parents.empty())
 		c.parent = -1;
@@ -311,12 +318,14 @@ void openddl::detail::ParserContext::push_structure(Token const * identifier, To
 	c.payload.structure_.children = 0;
 	commands.push_back(c);
 	parents.push_back(commands.size() - 1);
+	
 }
 void openddl::detail::ParserContext::push_property(Token const *ts, Token const * te)
 {
 	Command c;
 	c.type = Command::kProperty;
 	c.parent = parents.back();
+	c.depth = parents.size();
 	c.payload.property_.identifier = new std::string(ts->payload);
 	Token const *value = ts + 1;
 	switch (value->token_type)

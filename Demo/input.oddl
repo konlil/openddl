@@ -1,0 +1,23 @@
+Metric (key = "distance") {float {1}}
+Metric (key = "angle") {float {1}}
+Metric (key = "time") {float {1}}
+Metric (key = "up") {string {"z"}}
+
+GeometryNode $node1
+{
+	Name $name {string {"Box001"}}
+	ObjectRef $object {ref {$geometry1}}
+	MaterialRef $material {ref {$material1}}
+
+	Transform
+	{
+		float[16]
+		{
+			{0x3F800000, 0x00000000, 0x00000000, 0x00000000,		// {1, 0, 0, 0
+			 0x00000000, 0x3F800000, 0x00000000, 0x00000000,		//  0, 1, 0, 0
+			 0x00000000, 0x00000000, 0x3F800000, 0x00000000,		//  0, 0, 1, 0
+			 0xBEF33B00, 0x411804DE, 0x00000000, 0x3F800000}		//  -0.47506, 9.50119, 0, 1}
+		}
+	}
+}
+
