@@ -80,9 +80,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="detail.h" />
     <ClInclude Include="detail\Command.h" />
     <ClInclude Include="detail\LiteralHelpers.h" />
@@ -124,6 +121,11 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Ragel Compile: %{Filename}.rl</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">detail/%(Filename).cpp</Outputs>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

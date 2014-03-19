@@ -202,18 +202,20 @@ uint64_t openddl::detail::decode_integer(openddl::detail::Token::token_t type, c
 	}
 	return value;
 }
-bool openddl::detail::decode_literal(const openddl::detail::Token & t, openddl::detail::Command::LiteralPayload & payload)
+int openddl::detail::decode_literal(const openddl::detail::Token & t, openddl::detail::Command::LiteralPayload & payload)
 {
 
 	//Command::LiteralPayload::kReference is handled elsewhere
 	switch (payload.encoding)
 	{
 	case Command::LiteralPayload::kType:
-		payload.value.type_ = convert(t);
+		try { payload.value.type_ = convert(t); }
+		catch (std::out_of_range &) { return 1; }
 		break;
 	case Command::LiteralPayload::kBoolean:
 		if (t.payload == "true") payload.value.boolean_ = true;
-		else payload.value.boolean_ = false;
+		else if (t.payload == "false") payload.value.boolean_ = false;
+		else return -1;
 		break;
 	case Command::LiteralPayload::kFloat:
 		switch (t.token_type)
@@ -224,7 +226,7 @@ bool openddl::detail::decode_literal(const openddl::detail::Token & t, openddl::
 			payload.value.double_.lexical = false;
 			bool negate = false;
 			try{ payload.value.integer_.value = decode_integer(t.token_type, t.payload, negate); }
-			catch (std::out_of_range &) { return false; }
+			catch (std::out_of_range &) { return 1; }
 			payload.value.double_.value *= negate ? -1.0 : 1.0;
 		}
 			break;
@@ -232,19 +234,34 @@ bool openddl::detail::decode_literal(const openddl::detail::Token & t, openddl::
 		case Token::kFloatLiteral:
 			payload.value.double_.lexical = true;
 			try{ payload.value.double_.value = std::stod(t.payload); }
-			catch (std::out_of_range &) { return false; }
+			catch (std::out_of_range &) { return 1; }
 			break;
+		default:
+			return -1;
 		}
 		break;
 	case Command::LiteralPayload::kInteger:
-		try{ payload.value.integer_.value = decode_integer(t.token_type, t.payload, payload.value.integer_.negate); }
-		catch (std::out_of_range &) { return false; }
+		switch (t.token_type)
+		{
+		case Token::kHexLiteral:
+		case Token::kBinaryLiteral:
+		case Token::kCharacterLiteral:
+		case Token::kDecimalLiteral:
+			try{ payload.value.integer_.value = decode_integer(t.token_type, t.payload, payload.value.integer_.negate); }
+			catch (std::out_of_range &) { return 1; }
+			break;
+		default:
+			return -1;
+		}
 		break;
 	case Command::LiteralPayload::kString:
-		payload.value.string_ = new std::string(t.payload);
+		if (t.token_type == Token::kStringLiteral)
+			payload.value.string_ = new std::string(t.payload);
+		else
+			return -1;
 		break;
 	}
-	return true;
+	return 0;
 }
 
 
