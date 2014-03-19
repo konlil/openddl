@@ -228,4 +228,41 @@ TEST_CASE("Parsing nested data structures", "[parse]"){
 			}
 		}
 	}
+	GIVEN("Valid OpenDDL structures"){
+		std::string input = "Hello {string {\"Hello\"}} Hello $name {int8{1} float{99}}";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		std::vector<openddl::detail::Command> commands;
+		WHEN("the string is parsed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("should have no errors"){
+				REQUIRE(errors.empty());
+				AND_WHEN("the token stream is parsed"){
+					REQUIRE(openddl::detail::parse(tokens, commands, errors));
+					THEN("should have no errors"){
+						REQUIRE(errors.empty());
+					}
+				}
+			}
+		}
+	}
+	GIVEN("Unterminated OpenDDL structure"){
+		std::string input = "Hello {} {";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		std::vector<openddl::detail::Command> commands;
+		WHEN("the string is parsed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("should have no errors"){
+				REQUIRE(errors.empty());
+				AND_WHEN("the token stream is parsed"){
+					REQUIRE_FALSE(openddl::detail::parse(tokens, commands, errors));
+					THEN("should have errors"){
+						REQUIRE_FALSE(errors.empty());
+						CHECK(errors[0].message == "parse.unexpected_end_of_file");
+					}
+				}
+			}
+		}
+	}
 }

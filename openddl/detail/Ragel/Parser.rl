@@ -146,5 +146,11 @@ bool openddl::detail::parse(const std::vector<Token> & tokens, std::vector<Comma
 	
 	%% write init;
 	%% write exec;
+	if(top != 0)
+	{
+		Error e;
+		e.message = "parse.unexpected_end_of_file";
+		errors.push_back(e);
+	}
 	return p == pe && errors.size() == 0;
 }
