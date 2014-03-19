@@ -3,13 +3,13 @@ openddl (codeinoz.tumblr.com)
 
 OpenDDL Parser written in C++. Current status is pre-alpha. 
 
-Both lexer and parser have been written in ragel and are functional.
+Parser and Lexer have been written with Ragel and have a set of compliance tests for each. 
+All components in the detail namespace are essentially functional and tested but are in need of
+their completed API counterpart to handle coercion of numeric literals/properties to C++ types
+amongst others.
 
-Tests need to be finalised and written to provide full coverage.
+Other operations such as unescaping openddl encoded strings are left as a user invoked operation 
+and are not done automatically (unless a case for such can be made).
 
-A number of enhancements must be made to the parser to reach production status. 
-These include;
-* Dynamic Growable stack for parser
-* Enhancing error recovery within parser
-* Enhancing error logging within parser
+Memory management (Destructor/Constructor) for openddl::detail::Command is yet to be implemented.
 
