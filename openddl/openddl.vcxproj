@@ -80,16 +80,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="detail.h" />
     <ClInclude Include="detail\Command.h" />
+    <ClInclude Include="detail\detail.h" />
     <ClInclude Include="detail\LiteralHelpers.h" />
     <ClInclude Include="detail\Error.h" />
     <ClInclude Include="detail\LexerContext.h" />
     <ClInclude Include="detail\ParserContext.h" />
     <ClInclude Include="detail\Token.h" />
+    <ClInclude Include="exception.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tree.h" />
+    <ClInclude Include="Type.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="detail\Lexer.cpp" />
@@ -97,6 +99,7 @@
     <ClCompile Include="detail\Parser.cpp" />
     <ClCompile Include="detail\LexerContext.cpp" />
     <ClCompile Include="detail\ParserContext.cpp" />
+    <ClCompile Include="exception.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Tree.cpp" />
   </ItemGroup>

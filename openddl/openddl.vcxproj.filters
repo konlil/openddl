@@ -30,9 +30,6 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="detail.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="detail\LexerContext.h">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
@@ -52,6 +49,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="detail\ParserContext.h">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="detail\detail.h">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
   </ItemGroup>
@@ -75,6 +81,9 @@
       <Filter>Source Files\detail</Filter>
     </ClCompile>
     <ClCompile Include="Tree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

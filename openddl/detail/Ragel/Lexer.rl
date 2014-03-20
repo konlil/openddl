@@ -4,7 +4,7 @@
 //================================================================================================================
 
 #include "..\stdafx.h"
-#include "..\detail.h"
+#include "detail.h"
 #include "LexerContext.h"
 
 #define error(m) context.lex_error(m,ts,te)

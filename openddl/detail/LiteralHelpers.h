@@ -1,5 +1,5 @@
 #pragma once
-#include "../detail.h"
+#include "detail.h"
 #include "Token.h"
 #include "Command.h"
 #include <string>

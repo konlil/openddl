@@ -1,5 +1,6 @@
 #include "ParserContext.h"
 #include "LiteralHelpers.h"
+#include "../Type.h"
 #include <cstdint>
 
 
@@ -352,7 +353,7 @@ void openddl::detail::ParserContext::push_property(Token const *ts, Token const 
 		break;
 	case Token::kStringLiteral:
 		c.payload.property_.encoding = Command::PropertyPayload::kString;
-		c.payload.property_.value.string_ = new std::string(value->payload);
+		c.payload.property_.value.string_ = escape_string(value->payload);
 		break;
 	case Token::kBooleanLiteral:
 		c.payload.property_.encoding = Command::PropertyPayload::kBool;
