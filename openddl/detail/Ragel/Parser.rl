@@ -55,6 +55,8 @@ using namespace openddl::detail;
 
 	array_notation = data_type left_square integer_literal right_square;
 
+	#TODO: Provide invalid Reference Literal Specific Error
+	#TODO: Completely eliminate back tracking for error recovery within literal_sequence
 	literal_sequence := |*
 		(left_brace boolean_literal (comma boolean_literal)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kBoolean,ts,te); fret;};
 		(left_brace float_literal (comma float_literal)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kFloat,ts,te); fret;};

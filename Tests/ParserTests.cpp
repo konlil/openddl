@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "catch.hpp"
-#include "../openddl/detail.h"
+#include "../openddl/detail/detail.h"
 #include "../openddl/detail/Command.h"
 #include "../openddl/detail/Token.h"
 #include "../openddl/detail/Error.h"
@@ -141,6 +141,24 @@ TEST_CASE("Parsing Data Lists", "[parse]"){
 						REQUIRE_FALSE(errors.empty());
 						CHECK(errors[0].message == "semantic.literal.overflow");
 						CHECK(errors[1].message == "semantic.literal.underflow");
+					}
+				}
+			}
+		}
+	}
+	GIVEN("Invalid reference literal"){
+		std::string input = "ref { null $hello, %hello $hello  } ";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		std::vector<openddl::detail::Command> commands;
+		WHEN("the string is lexed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("should have no errors"){
+				REQUIRE(errors.empty());
+				AND_WHEN("the token stream is parsed"){
+					REQUIRE_FALSE(openddl::detail::parse(tokens, commands, errors));
+					THEN("should have errors"){
+						REQUIRE_FALSE(errors.empty());
 					}
 				}
 			}

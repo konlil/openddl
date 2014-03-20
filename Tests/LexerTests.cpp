@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "catch.hpp"
-#include "../openddl/detail.h"
+#include "../openddl/detail/detail.h"
 #include "../openddl/detail/Token.h"
 #include "../openddl/detail/Error.h"
 
