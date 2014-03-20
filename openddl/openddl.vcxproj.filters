@@ -45,10 +45,13 @@
     <ClInclude Include="detail\Command.h">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
-    <ClInclude Include="detail\ParserContext.h">
+    <ClInclude Include="detail\LiteralHelpers.h">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="Tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="detail\LiteralHelpers.h">
+    <ClInclude Include="detail\ParserContext.h">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
   </ItemGroup>
@@ -70,6 +73,9 @@
     </ClCompile>
     <ClCompile Include="detail\ParserContext.cpp">
       <Filter>Source Files\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="Tree.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

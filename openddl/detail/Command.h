@@ -5,6 +5,8 @@
 
 namespace openddl
 {
+	enum Type;
+
 	namespace detail
 	{
 		struct Command
