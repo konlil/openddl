@@ -94,6 +94,7 @@
     <ClInclude Include="Type.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="detail\Command.cpp" />
     <ClCompile Include="detail\Lexer.cpp" />
     <ClCompile Include="detail\LiteralHelpers.cpp" />
     <ClCompile Include="detail\Parser.cpp" />

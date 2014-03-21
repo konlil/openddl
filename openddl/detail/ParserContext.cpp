@@ -135,21 +135,27 @@ int openddl::detail::ParserContext::build_literal(Command::LiteralPayload::encod
 }
 void openddl::detail::ParserContext::push_list_type(Token const * type, Token const * name)
 {
-	Command c;
-	c.depth = parents.size();
-	c.type = Command::kDataList;
-	c.payload.list_.type = convert(*type);
+
+	unsigned int depth = parents.size();
+	int parent;
+	Command::DataListPayload list;
+	list.type = convert(*type);
+
 	if (parents.empty())
-		c.parent = -1;
+		parent = -1;
 	else
 	{
-		c.parent = parents.back();
+		parent = parents.back();
 		if (commands[parents.back()].type == Command::kStructure)
 			commands[parents.back()].payload.structure_.children++;
 	}
 	if (name)
-		c.payload.list_.name = new std::string(name->payload);
-	commands.push_back(c);
+		list.name = new std::string(name->payload);
+	else
+		list.name = nullptr;
+
+	commands.emplace_back(list,parent,depth);
+
 	parents.push_back(commands.size()-1);
 }
 
@@ -168,18 +174,16 @@ void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::
 	{
 		encoding = type_encoding;
 	}
-	Command c;
-	c.type = Command::kLiteral;
-	c.parent = commands.size() - 1;
-	c.depth = parents.size();
+
+	int parent = commands.size() - 1;
+	unsigned int depth = parents.size();
 	Command::LiteralPayload payload;
 
 	Token const * i = ts + 1;
 	while (i < te - 1)
 	{
 		i += build_literal(encoding, i, te - 1, payload) + 1;
-		c.payload.literal_ = payload;
-		commands.push_back(c);
+		commands.emplace_back(payload,parent,depth);
 		
 	}
 
@@ -206,24 +210,25 @@ void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::
 
 void openddl::detail::ParserContext::push_array_type(Token const * type, Token const * dimensions, Token const * name)
 {
-	Command c;
-	c.type = Command::kDataArray;
-	c.depth = parents.size();
-	c.payload.array_.type = convert(*type);
-	c.payload.array_.length = 0;
+
+	unsigned int depth = parents.size();
+	int parent;
+	Command::DataArrayPayload payload;
+	payload.type = convert(*type);
+	payload.length = 0;
 	if (parents.empty())
-		c.parent = -1;
+		parent = -1;
 	else
 	{
-		c.parent = &commands[parents.back()] - commands.data();
+		parent = &commands[parents.back()] - commands.data();
 		if (commands[parents.back()].type == Command::kStructure)
 			commands[parents.back()].payload.structure_.children++;
 	}
 		
 	if (name != nullptr)
-		c.payload.array_.name = new std::string(name->payload);
+		payload.name = new std::string(name->payload);
 	else
-		name = nullptr;
+		payload.name = nullptr;
 	Command::LiteralPayload dimension_size;
 	dimension_size.encoding = Command::LiteralPayload::kInteger;
 	int a = 0, b=0;
@@ -237,7 +242,7 @@ void openddl::detail::ParserContext::push_array_type(Token const * type, Token c
 			e.message = "semantic.array.size_invalid";
 		e.payload = dimensions->payload;
 		errors.push_back(e);
-		c.payload.array_.dimension = 0;
+		payload.dimension = 0;
 	}
 	else
 	{
@@ -248,9 +253,9 @@ void openddl::detail::ParserContext::push_array_type(Token const * type, Token c
 			errors.push_back(e);
 		}
 			
-		c.payload.array_.dimension = (uint32_t)dimension_size.value.integer_.value;
+		payload.dimension = (uint32_t)dimension_size.value.integer_.value;
 	}
-	commands.push_back(c);
+	commands.emplace_back(payload, parent, depth);
 	parents.push_back(commands.size() - 1);
 	
 	
@@ -258,15 +263,15 @@ void openddl::detail::ParserContext::push_array_type(Token const * type, Token c
 
 void openddl::detail::ParserContext::push_array_element()
 {
-	Command & parent = commands[parents.back()];
-	Command c;
-	c.depth = parents.size();
-	c.type = Command::kArrayElement;
-	c.parent = parents.back();
-	c.payload.element_.subindex = parent.payload.array_.length;
-	parent.payload.array_.length++;
-	c.payload.element_.length = 0;
-	commands.push_back(c);
+	Command & array = commands[parents.back()];
+	unsigned int depth = parents.size();
+	int parent = parents.back();
+
+	Command::ArrayElementPayload payload;
+	payload.subindex = array.payload.array_.length;
+	array.payload.array_.length++;
+	payload.length = 0;
+	commands.emplace_back(payload, parent, depth);
 	parents.push_back(commands.size() - 1);
 }
 
@@ -298,84 +303,83 @@ void openddl::detail::ParserContext::end_array()
 
 void openddl::detail::ParserContext::push_structure(Token const * identifier, Token const * name)
 {
-	Command c;
-	c.depth = parents.size();
-	c.type = Command::kStructure;
+	unsigned int depth = parents.size();
+	int parent;
 	if (parents.empty())
-		c.parent = -1;
+		parent = -1;
 	else
 	{
-		c.parent = parents.back();
+		parent = parents.back();
 		if (commands[parents.back()].type == Command::kStructure)
 			commands[parents.back()].payload.structure_.children++;
 	}
 		
-	c.payload.structure_.identifier = new std::string(identifier->payload);
+	Command::StructurePayload payload;
+	payload.identifier = new std::string(identifier->payload);
 	if (name != nullptr)
-		c.payload.structure_.name = new std::string(name->payload);
+		payload.name = new std::string(name->payload);
 	else
-		c.payload.structure_.name = nullptr;
-	c.payload.structure_.properties = 0;
-	c.payload.structure_.children = 0;
-	commands.push_back(c);
+		payload.name = nullptr;
+	payload.properties = 0;
+	payload.children = 0;
+	commands.emplace_back(payload, parent, depth);
 	parents.push_back(commands.size() - 1);
 	
 }
 void openddl::detail::ParserContext::push_property(Token const *ts, Token const * te)
 {
-	Command c;
-	c.type = Command::kProperty;
-	c.parent = parents.back();
-	c.depth = parents.size();
-	c.payload.property_.identifier = new std::string(ts->payload);
+	int parent = parents.back();
+	int depth = parents.size();
+	Command::PropertyPayload payload;
+	payload.identifier = new std::string(ts->payload);
 	Token const *value = ts + 1;
 	switch (value->token_type)
 	{
 	case Token::kBinaryLiteral:
-		c.payload.property_.encoding = Command::PropertyPayload::kBinary; 
-		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		payload.encoding = Command::PropertyPayload::kBinary; 
+		payload.value.numeric_ = new std::string(value->payload);
 		break;
 	case Token::kHexLiteral:
-		c.payload.property_.encoding = Command::PropertyPayload::kHex; 
-		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		payload.encoding = Command::PropertyPayload::kHex; 
+		payload.value.numeric_ = new std::string(value->payload);
 		break;
 	case Token::kCharacterLiteral:
-		c.payload.property_.encoding = Command::PropertyPayload::kCharacter; 
-		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		payload.encoding = Command::PropertyPayload::kCharacter; 
+		payload.value.numeric_ = new std::string(value->payload);
 		break;
 	case Token::kDecimalLiteral:
-		c.payload.property_.encoding = Command::PropertyPayload::kDecimal; 
-		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		payload.encoding = Command::PropertyPayload::kDecimal; 
+		payload.value.numeric_ = new std::string(value->payload);
 		break;
 	case Token::kFloatLiteral:
-		c.payload.property_.encoding = Command::PropertyPayload::kFloat; 
-		c.payload.property_.value.numeric_ = new std::string(value->payload);
+		payload.encoding = Command::PropertyPayload::kFloat; 
+		payload.value.numeric_ = new std::string(value->payload);
 		break;
 	case Token::kStringLiteral:
-		c.payload.property_.encoding = Command::PropertyPayload::kString;
-		c.payload.property_.value.string_ = escape_string(value->payload);
+		payload.encoding = Command::PropertyPayload::kString;
+		payload.value.string_ = escape_string(value->payload);
 		break;
 	case Token::kBooleanLiteral:
-		c.payload.property_.encoding = Command::PropertyPayload::kBool;
-		c.payload.property_.value.boolean_ = "true" ? true : false;
+		payload.encoding = Command::PropertyPayload::kBool;
+		payload.value.boolean_ = "true" ? true : false;
 		break;
 	case Token::kType:
-		c.payload.property_.encoding = Command::PropertyPayload::kDataType;
-		c.payload.property_.value.type_ = convert(*value);
+		payload.encoding = Command::PropertyPayload::kDataType;
+		payload.value.type_ = convert(*value);
 		break;
 	
 	case Token::kNull:
 	case Token::kGlobalName:
 	case Token::kLocalName:
-		c.payload.property_.encoding = Command::PropertyPayload::kReference;
+		payload.encoding = Command::PropertyPayload::kReference;
 		std::vector<std::string> * reference = new std::vector<std::string>();
 		for (Token const * i = value; i <= te; i++)
 			reference->emplace_back(i->payload);
-		c.payload.property_.value.reference_ = reference;
+		payload.value.reference_ = reference;
 		break;
 	}
 	commands[parents.back()].payload.structure_.properties++;
-	commands.push_back(c);
+	commands.emplace_back(payload, parent, depth);
 }
 void openddl::detail::ParserContext::end_structure()
 {
