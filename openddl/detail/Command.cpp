@@ -50,10 +50,12 @@ void destroy(openddl::detail::Command::LiteralPayload & literal)
 	switch (literal.encoding)
 	{
 	case Command::LiteralPayload::kReference:
-		literal.value.reference_->~vector();
+		delete literal.value.reference_;
+		literal.value.reference_ = nullptr;
 		break;
 	case Command::LiteralPayload::kString:
-		literal.value.string_->~basic_string();
+		delete literal.value.string_;
+		literal.value.string_ = nullptr;
 		break;
 	}
 }
@@ -72,17 +74,20 @@ void destroy(openddl::detail::Command::PropertyPayload & property){
 	switch (property.encoding)
 	{
 	case Command::PropertyPayload::kReference:
-		property.value.reference_->~vector();
+		delete property.value.reference_;
+		property.value.reference_ = nullptr;
 		break;
 	case Command::PropertyPayload::kString:
-		property.value.string_->~basic_string();
+		delete property.value.string_;
+		property.value.string_ = nullptr;
 		break;
 	case Command::PropertyPayload::kBinary:
 	case Command::PropertyPayload::kCharacter:
 	case Command::PropertyPayload::kHex:
 	case Command::PropertyPayload::kFloat:
 	case Command::PropertyPayload::kDecimal:
-		property.value.numeric_->~basic_string();
+		delete property.value.numeric_;
+		property.value.numeric_ = nullptr;
 		break;
 	}
 }
