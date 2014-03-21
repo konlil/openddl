@@ -21,11 +21,9 @@ namespace openddl
 			
 
 		public:
-
+			void push_error(const std::string & message);
 			void push_list_type(Token const * type, Token const * name = nullptr);
-			//Used with
 			void push_literal_list(Command::LiteralPayload::encoding_t encoding,Token const * ts, Token const * te);
-
 			
 			void push_array_type(Token const * type, Token const * dimensions, Token const * name = nullptr);
 			void push_array_element();

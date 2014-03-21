@@ -69,7 +69,7 @@ TEST_CASE("Parsing Data Lists", "[parse]"){
 	}
 
 	GIVEN("Literal List encoding mismatch"){
-		std::string input = "int8 { 3.0,30 } ";
+		std::string input = "int8 { 30,3.0 } ";
 		std::vector<openddl::detail::Error> errors;
 		std::vector<openddl::detail::Token> tokens;
 		std::vector<openddl::detail::Command> commands;
@@ -81,7 +81,7 @@ TEST_CASE("Parsing Data Lists", "[parse]"){
 					REQUIRE_FALSE(openddl::detail::parse(tokens, commands, errors));
 					THEN("should have errors"){
 						REQUIRE_FALSE(errors.empty());
-						CHECK(errors[0].message == "semantic.literal.type_mismatch");
+						CHECK(errors[0].message == "parse.literal.type_mismatch");
 					}
 				}
 			}
@@ -126,26 +126,6 @@ TEST_CASE("Parsing Data Lists", "[parse]"){
 		}
 	}
 	
-	GIVEN("Literals which will cause containing type to overflow"){
-		std::string input = "int8 { 200 , -200 } ";
-		std::vector<openddl::detail::Error> errors;
-		std::vector<openddl::detail::Token> tokens;
-		std::vector<openddl::detail::Command> commands;
-		WHEN("the string is lexed"){
-			REQUIRE(openddl::detail::lex(input, tokens, errors));
-			THEN("should have no errors"){
-				REQUIRE(errors.empty());
-				AND_WHEN("the token stream is parsed"){
-					REQUIRE_FALSE(openddl::detail::parse(tokens, commands, errors));
-					THEN("should have errors"){
-						REQUIRE_FALSE(errors.empty());
-						CHECK(errors[0].message == "semantic.literal.overflow");
-						CHECK(errors[1].message == "semantic.literal.underflow");
-					}
-				}
-			}
-		}
-	}
 	GIVEN("Invalid reference literal"){
 		std::string input = "ref { null $hello, %hello $hello  } ";
 		std::vector<openddl::detail::Error> errors;
@@ -186,25 +166,7 @@ TEST_CASE("Parsing Data List Array", "[parse]"){
 			}
 		}
 	}
-	GIVEN("Variable length data array lists"){
-		std::string input = "float[2] $name {{1.0,2,3},{3.0,4}} ";
-		std::vector<openddl::detail::Error> errors;
-		std::vector<openddl::detail::Token> tokens;
-		std::vector<openddl::detail::Command> commands;
-		WHEN("the string is parsed"){
-			REQUIRE(openddl::detail::lex(input, tokens, errors));
-			THEN("should have no errors"){
-				REQUIRE(errors.empty());
-				AND_WHEN("the token stream is parsed"){
-					REQUIRE_FALSE(openddl::detail::parse(tokens, commands, errors));
-					THEN("should have errors"){
-						REQUIRE_FALSE(errors.empty());
-						CHECK(errors[0].message == "semantic.array.size_mismatch");
-					}
-				}
-			}
-		}
-	}
+
 
 }
 

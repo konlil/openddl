@@ -89,6 +89,9 @@
     <ClCompile Include="detail\Command.cpp">
       <Filter>Source Files\detail</Filter>
     </ClCompile>
+    <ClCompile Include="detail\SemanticChecker.cpp">
+      <Filter>Source Files\detail</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="detail/Ragel/Lexer.rl">

@@ -100,6 +100,7 @@
     <ClCompile Include="detail\Parser.cpp" />
     <ClCompile Include="detail\LexerContext.cpp" />
     <ClCompile Include="detail\ParserContext.cpp" />
+    <ClCompile Include="detail\SemanticChecker.cpp" />
     <ClCompile Include="exception.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Tree.cpp" />

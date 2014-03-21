@@ -69,6 +69,13 @@ openddl::detail::ParserContext::ParserContext(const std::vector<Token> & tokens,
 {
 }
 
+void openddl::detail::ParserContext::push_error(const std::string & message)
+{
+	Error e;
+	e.message = std::move(message);
+	errors.push_back(e);
+}
+
 int openddl::detail::ParserContext::build_literal(Command::LiteralPayload::encoding_t encoding, Token const * ts, Token const * te, Command::LiteralPayload & payload)
 {
 	payload.encoding = encoding;
@@ -87,48 +94,13 @@ int openddl::detail::ParserContext::build_literal(Command::LiteralPayload::encod
 	}
 	else
 	{
-		Type type;
-		Command * parent = &commands[parents.back()];
-		if (parent->type == Command::kDataList)
-			type = parent->payload.list_.type;
-		else if (parent->type == Command::kArrayElement)
-		{
-			type = commands[parent->parent].payload.array_.type;
-		}
-		int code = 0;
+		int code;
 		if ((code=decode_literal(*ts, payload))!=0)
-		{
-			Error e;
-			
-			switch (code)
-			{
-			case 1:
-				e.message = "parse.literal.out_of_range";
-				break;
-			case -1:
-				e.message = "semantic.literal.type_mismatch";
-				break;
-			}
-			
-			e.payload = ts->payload;
-			errors.push_back(e);
-		}
-		else if ((code = detect_limits(type, payload)) != 0)
-		{
-			Error e;
-
-			switch (code)
-			{
-			case 1:
-				e.message = "semantic.literal.overflow";
-				break;
-			case -1:
-				e.message = "semantic.literal.underflow";
-				break;
-			}
-
-			e.payload = ts->payload;
-			errors.push_back(e);
+		{		
+			if(code == 1)
+				push_error("parse.literal.out_of_range");
+			else if (code == -1)
+				push_error("parse.literal.type_mismatch"); 
 		}
 		return 1;
 	}
@@ -196,14 +168,6 @@ void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::
 			parent->payload.element_.length = &commands.back() - parent;
 	}
 	
-
-	if (type_encoding != encoding)
-	{
-		Error e;
-		e.message = "semantic.literal.type_mismatch";
-		errors.push_back(e);
-	}
-	
 	parents.pop_back();
 
 }
@@ -231,27 +195,16 @@ void openddl::detail::ParserContext::push_array_type(Token const * type, Token c
 		payload.name = nullptr;
 	Command::LiteralPayload dimension_size;
 	dimension_size.encoding = Command::LiteralPayload::kInteger;
-	int a = 0, b=0;
-	if ((a=decode_literal(*dimensions, dimension_size))!=0 && (b = detect_limits(Type::kUnsignedInt32, dimension_size)) != 0)
+
+	if (decode_literal(*dimensions, dimension_size) != 0 )
 	{
-		Error e;
-		
-		if (b == -1)
-			e.message = "semantic.array.size_negative";
-		else
-			e.message = "semantic.array.size_invalid";
-		e.payload = dimensions->payload;
-		errors.push_back(e);
+
+		push_error("parse.array.index.decode_error");
+
 		payload.dimension = 0;
 	}
 	else
 	{
-		if (dimension_size.value.integer_.value == 0)
-		{
-			Error e;
-			e.message = "semantic.array.size_zero";
-			errors.push_back(e);
-		}
 			
 		payload.dimension = (uint32_t)dimension_size.value.integer_.value;
 	}
@@ -277,27 +230,6 @@ void openddl::detail::ParserContext::push_array_element()
 
 void openddl::detail::ParserContext::end_array()
 {
-	Command * c = &commands[parents.back()];
-	int count = c->payload.array_.length;
-	int size = c->payload.array_.dimension;
-	
-	//Check to ensure all sub arrays in list are of specified size;
-	//Don't bother if size == 0 as this case has already been handled
-	if (size != 0)
-	{
-		c += 1;
-		for (int i = 0; i < count; i++)
-		{
-			if (c->payload.element_.length != size)
-			{
-				Error e;
-				e.message = "semantic.array.size_mismatch";
-				errors.push_back(e);
-				break;
-			}
-			c += c->payload.element_.length+1;
-		}		
-	}
 	parents.pop_back();
 }
 
@@ -357,7 +289,7 @@ void openddl::detail::ParserContext::push_property(Token const *ts, Token const 
 		break;
 	case Token::kStringLiteral:
 		payload.encoding = Command::PropertyPayload::kString;
-		payload.value.string_ = escape_string(value->payload);
+		payload.value.string_ = new std::string(value->payload);
 		break;
 	case Token::kBooleanLiteral:
 		payload.encoding = Command::PropertyPayload::kBool;

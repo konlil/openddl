@@ -7,10 +7,11 @@ using namespace openddl::detail;
 	
 	machine Parser;
 	getkey p->token_type;
+	alphtype unsigned int;
 	write data;
 
 	prepush {
-		if(top > stack.capacity())
+		if(top > stack.capacity()-1)
 			stack.resize(stack.capacity()*2,-1);
 	}
 
@@ -66,9 +67,9 @@ using namespace openddl::detail;
 		(left_brace reference (comma reference)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kReference,ts,te); fret;};
 		(left_brace data_type (comma data_type)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kType,ts,te); fret;};
 
-		left_brace => {Error e; e.message = "parse.unexpected_end_of_file"; errors.push_back(e);};
-		left_brace literal (comma literal)* literal => {Error e; e.message = "parse.data_list.missing_comma"; errors.push_back(e);};
-		left_brace literal (comma literal)* right_brace => {Error e; e.message = "semantic.literal.type_mismatch"; errors.push_back(e);};
+		left_brace => {context.push_error("parse.unexpected_end_of_file");};
+		left_brace literal (comma literal)* literal => {context.push_error("parse.data_list.missing_comma");};
+		left_brace literal (comma literal)* right_brace => { context.push_error("semantic.literal.type_mismatch");};
 	*|;
 	data_array := |*
 		left_brace => { context.push_array_element(); fhold; fcall literal_sequence;};
@@ -86,30 +87,30 @@ using namespace openddl::detail;
 	*|;
 	structure := |*	
 		data_type name? left_brace => { 
-			if((te-ts)==3)
+			if( te-ts ==3)
 				context.push_list_type(ts,ts+1);
-			else if((te-ts)==2)
+			else if( te-ts == 2)
 				context.push_list_type(ts);
 			fhold; fcall literal_sequence; 
 		};
 		array_notation name? left_brace => {
-			if((te-ts)==6)
+			if( te-ts == 6)
 				context.push_array_type(ts,ts+2,ts+4);
-			else if((te-ts)==5)
+			else if( te-ts == 5)
 				context.push_array_type(ts,ts+2);
 			fcall data_array;
 		};
 		identifier name? left_brace => {
-			if((te-ts) == 3)
+			if( te-ts == 3)
 				context.push_structure(ts,ts+1); 
-			else if((te-ts)==2)
+			else if( te-ts == 2)
 				context.push_structure(ts);
 			fcall structure;
 		};
 		identifier name? left_bracket => { 
-				if((te-ts) == 3)
+				if( te-ts == 3)
 					context.push_structure(ts,ts+1); 
-				else if((te-ts)==2)
+				else if( te-ts == 2)
 					context.push_structure(ts);
 				fcall structure_property_list;
 				};
@@ -144,9 +145,7 @@ bool openddl::detail::parse(const std::vector<Token> & tokens, std::vector<Comma
 
 	if(top != 0)
 	{
-		Error e;
-		e.message = "parse.unexpected_end_of_file";
-		errors.push_back(e);
+		context.push_error("parse.unexpected_end_of_file");
 	}
 	return p == pe && errors.size() == 0;
 }

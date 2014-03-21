@@ -257,7 +257,7 @@ int openddl::detail::decode_literal(const openddl::detail::Token & t, openddl::d
 		break;
 	case Command::LiteralPayload::kString:
 		if (t.token_type == Token::kStringLiteral)
-			payload.value.string_ = escape_string(t.payload);
+			payload.value.string_ = new std::string(t.payload);
 		else
 			return -1;
 		break;
