@@ -31,7 +31,6 @@ namespace openddl
 			};
 			struct ArrayElementPayload
 			{
-
 				unsigned int subindex;
 				unsigned int length;
 			};

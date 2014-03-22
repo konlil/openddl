@@ -29,6 +29,7 @@ int main(int argc, char * argv[])
 	else
 		try{
 			openddl::Tree tree = openddl::Tree::parse(input);
+			std::cout << "Success" << std::endl;
 		}
 		catch (openddl::LexerError & e){
 			std::cout << e.what() << std::endl;

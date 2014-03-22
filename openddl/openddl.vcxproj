@@ -114,7 +114,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o detail\%(Filename).cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">detail\%(Filename).cpp</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Ragel Compile: %(Filename).rl</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Ragel Compile: %{Filename}.rl</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Ragel Compile: %(Filename).rl</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">detail\%(Filename).cpp</Outputs>
     </CustomBuild>
     <CustomBuild Include="detail/Ragel/Parser.rl">
@@ -125,7 +125,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)/bin/Ragel.exe %(FullPath) -o detail/%(Filename).cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">detail/%(Filename).cpp</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Ragel Compile: %(Filename).rl</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Ragel Compile: %{Filename}.rl</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Ragel Compile: %(Filename).rl</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">detail/%(Filename).cpp</Outputs>
     </CustomBuild>
   </ItemGroup>

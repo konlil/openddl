@@ -37,10 +37,12 @@ openddl::detail::Command::Command(Type t, unsigned int p, unsigned int d)
 
 openddl::detail::Command::Command(Command && rhs)
 {
+	//Used to fix union deletion bug in Release.
+	memset(&payload, 0, sizeof(payload));
 	std::swap(type, rhs.type);
 	std::swap(depth, rhs.depth);
 	std::swap(parent, rhs.parent);
-	std::swap(payload, rhs.payload);
+	std::swap(payload, rhs.payload);	
 }
 
 //Internal helper functions for freeing memory used by payloads
@@ -101,24 +103,17 @@ void destroy(openddl::detail::Command::StructurePayload & structure){
 
 openddl::detail::Command::~Command()
 {
-	switch (type)
-	{
-	case Command::kLiteral:
+	if(type == Command::kLiteral)
 		destroy(payload.literal_); 
-		break;
-	case Command::kDataArray:
+	else if(type == Command::kDataArray)
 		destroy(payload.array_); 
-		break;
-	case Command::kDataList:
+	else if(type == Command::kDataList)
 		destroy(payload.list_); 
-		break;
-	case Command::kProperty:
+	else if (type == Command::kProperty)
 		destroy(payload.property_); 
-		break;
-	case Command::kStructure:
+	else if (type == Command::kStructure)
 		destroy(payload.structure_); 
-		break;
-	}
+
 }
 
 
