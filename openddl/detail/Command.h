@@ -84,16 +84,16 @@ namespace openddl
 				PropertyPayload property_;
 			} payload;
 
-			
-			int parent;
+			//0 if no parent, non-zero if parent
+			unsigned int parent;
 			unsigned int depth;
-			Command(LiteralPayload & p,int parent = -1,unsigned int depth = 0);
-			Command(StructurePayload & s, int parent = -1, unsigned int depth = 0);
-			Command(DataListPayload & l, int parent = -1, unsigned int depth = 0);
-			Command(DataArrayPayload & a, int parent = -1, unsigned int depth = 0);
-			Command(ArrayElementPayload & e, int parent = -1, unsigned int depth = 0);
-			Command(PropertyPayload & p, int parent = -1, unsigned int depth = 0);
-			Command(Type t, int parent, unsigned int depth);
+			Command(LiteralPayload & p,unsigned int parent = 0,unsigned int depth = 0);
+			Command(StructurePayload & s, unsigned int parent = 0, unsigned int depth = 0);
+			Command(DataListPayload & l, unsigned int parent = 0, unsigned int depth = 0);
+			Command(DataArrayPayload & a, unsigned int parent = 0, unsigned int depth = 0);
+			Command(ArrayElementPayload & e, unsigned int parent = 0, unsigned int depth = 0);
+			Command(PropertyPayload & p, unsigned int parent = 0, unsigned int depth = 0);
+			Command(Type t, unsigned int parent, unsigned int depth);
 			Command(Command && rhs);
 			~Command();
 

@@ -21,6 +21,11 @@ openddl::Tree openddl::Tree::parse(const std::string & i)
 	{
 		throw ParseError(errors);
 	}
+	else if (!detail::semantic_check(commands, errors, t.global_names, t.local_names))
+	{
+		throw SemanticError(errors);
+	}
+	
 	t.commands = std::move(commands);
 	return std::move(t);
 }
@@ -33,5 +38,7 @@ openddl::Tree::Tree()
 openddl::Tree::Tree(Tree&&t)
 {
 	commands = std::move(t.commands);
+	local_names = std::move(t.local_names);
+	global_names = std::move(t.global_names);
 }
 

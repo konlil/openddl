@@ -17,7 +17,7 @@ namespace openddl
 			std::vector<Error> & errors;
 		
 
-			std::vector<int> parents;
+			std::vector<unsigned int> parents;
 			
 
 		public:

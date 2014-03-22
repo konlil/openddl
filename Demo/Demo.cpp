@@ -38,6 +38,10 @@ int main(int argc, char * argv[])
 			std::cout << e.what() << std::endl;
 			std::cout << e.errors() << std::endl;
 		}
+		catch (openddl::SemanticError & e){
+			std::cout << e.what() << std::endl;
+			std::cout << e.errors() << std::endl;
+		}
 		
 	return 0;
 	

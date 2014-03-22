@@ -23,7 +23,7 @@ namespace openddl
 		bool parse(const std::vector<Token> & tokens, std::vector<Command> & commands, std::vector<Error> & errors);
 		//Will return false upon error
 		//Will construct reference indices (to speed up reference lookups) in global_names and local_names respectively 
-		bool semantic_check(std::vector<Command> & commands, std::vector<Error> & errors, std::map<std::string,int> & global_names, std::map<int,std::map<std::string,int> > & local_names);
+		bool semantic_check(std::vector<Command> & commands, std::vector<Error> & errors, std::map<std::string,unsigned int> & global_names, std::map<unsigned int,std::map<std::string,unsigned int> > & local_names);
 
 	}
 

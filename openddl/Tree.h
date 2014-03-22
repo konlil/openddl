@@ -99,9 +99,9 @@ namespace openddl
 		* Members related to performing reference look ups within the OpenDDL tree
 		*/
 		
-		//typedef std::map<std::string,int> reference_table;
-		//reference_table global_names;
-		//std::map<int,reference_table> local_names;
+		typedef std::map<std::string,unsigned int> reference_table;
+		reference_table global_names;
+		std::map<unsigned int,reference_table> local_names;
 
 		//Implementation used internally by structure/tree to find referenced node
 		//friend struct Structure;

@@ -18,6 +18,8 @@ namespace openddl
 		int decode_literal(const Token & t, Command::LiteralPayload & payload);	
 		//Return -1 if underflow, return 1 if overflow else return 0
 		int detect_limits(Type type, const Command::LiteralPayload & payload);
+		bool encoding_mismatch(Type type, Command::LiteralPayload::encoding_t encoding);
+		Command::LiteralPayload::encoding_t get_encoding(Type type);
 
 
 	}

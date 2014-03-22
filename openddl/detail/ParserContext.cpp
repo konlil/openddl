@@ -4,66 +4,6 @@
 #include <cstdint>
 
 
-
-bool encoding_mismatch(openddl::Type type, openddl::detail::Command::LiteralPayload::encoding_t encoding)
-{
-	using openddl::detail::Command;
-	using openddl::Type;
-	switch (type)
-	{
-	case Type::kInt8:
-	case Type::kInt16:
-	case Type::kInt32:
-	case Type::kInt64:
-	case Type::kUnsignedInt8:
-	case Type::kUnsignedInt16:
-	case Type::kUnsignedInt32:
-	case Type::kUnsignedInt64:
-		if (encoding == Command::LiteralPayload::kInteger) return false; else return true;
-	case Type::kBool:
-		if (encoding == Command::LiteralPayload::kBoolean) return false; else return true;
-	case Type::kDouble:
-	case Type::kFloat:
-		if (encoding == Command::LiteralPayload::kFloat) return false; else return true;
-	case Type::kRef:
-		if (encoding == Command::LiteralPayload::kReference) return false; else return true;
-	case Type::kString:
-		if (encoding == Command::LiteralPayload::kString) return false; else return true;
-	case Type::kType:
-		if (encoding == Command::LiteralPayload::kType) return false; else return true;
-	default:
-		return true;
-	}
-}
-openddl::detail::Command::LiteralPayload::encoding_t get_encoding(openddl::Type type)
-{
-	using namespace openddl;
-	using openddl::detail::Command;
-	switch (type)
-	{
-	case Type::kInt8:
-	case Type::kInt16:
-	case Type::kInt32:
-	case Type::kInt64:
-	case Type::kUnsignedInt8:
-	case Type::kUnsignedInt16:
-	case Type::kUnsignedInt32:
-	case Type::kUnsignedInt64:
-		return Command::LiteralPayload::kInteger;
-	case Type::kDouble:
-	case Type::kFloat:
-		return Command::LiteralPayload::kFloat;
-	case Type::kBool:
-		return Command::LiteralPayload::kBoolean;
-	case Type::kRef:
-		return Command::LiteralPayload::kReference;
-	case Type::kString:
-		return Command::LiteralPayload::kString;
-	case Type::kType:
-		return Command::LiteralPayload::kType;
-	}
-}
-
 openddl::detail::ParserContext::ParserContext(const std::vector<Token> & tokens, std::vector<Command> & commands, std::vector<Error> & errors)
 : tokens(tokens), commands(commands), errors(errors)
 {
@@ -72,7 +12,7 @@ openddl::detail::ParserContext::ParserContext(const std::vector<Token> & tokens,
 void openddl::detail::ParserContext::push_error(const std::string & message)
 {
 	Error e;
-	e.message = std::move(message);
+	e.message = message;
 	errors.push_back(e);
 }
 
@@ -109,17 +49,17 @@ void openddl::detail::ParserContext::push_list_type(Token const * type, Token co
 {
 
 	unsigned int depth = parents.size();
-	int parent;
+	unsigned int parent;
 	Command::DataListPayload list;
 	list.type = convert(*type);
 
 	if (parents.empty())
-		parent = -1;
+		parent = 0;
 	else
 	{
 		parent = parents.back();
-		if (commands[parents.back()].type == Command::kStructure)
-			commands[parents.back()].payload.structure_.children++;
+		if (commands[parents.back()-1].type == Command::kStructure)
+			commands[parents.back()-1].payload.structure_.children++;
 	}
 	if (name)
 		list.name = new std::string(name->payload);
@@ -128,26 +68,30 @@ void openddl::detail::ParserContext::push_list_type(Token const * type, Token co
 
 	commands.emplace_back(list,parent,depth);
 
-	parents.push_back(commands.size()-1);
+	parents.push_back(commands.size());
 }
 
 void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::encoding_t encoding, Token const * ts, Token const * te)
 {
 	Command::LiteralPayload::encoding_t type_encoding;
-	if (commands.back().type == Command::kDataList)
-		type_encoding = get_encoding(commands.back().payload.list_.type);
-	else
-		type_encoding = get_encoding(commands[commands[parents.back()].parent].payload.array_.type);
-	if (type_encoding == Command::LiteralPayload::kInteger && encoding == Command::LiteralPayload::kFloat)
-	{
-		encoding = type_encoding;
+	try {
+		if (commands.back().type == Command::kDataList)
+			type_encoding = get_encoding(commands.back().payload.list_.type);
+		else
+			type_encoding = get_encoding(commands[commands[parents.back()-1].parent-1].payload.array_.type);
+		if (type_encoding == Command::LiteralPayload::kInteger && encoding == Command::LiteralPayload::kFloat
+			|| type_encoding == Command::LiteralPayload::kFloat && encoding == Command::LiteralPayload::kInteger)
+		{
+			encoding = type_encoding;
+		}
 	}
-	else if (type_encoding == Command::LiteralPayload::kFloat && encoding == Command::LiteralPayload::kInteger)
+	catch (std::out_of_range &)
 	{
-		encoding = type_encoding;
+		push_error("parse.literal.internal_error");
+		type_encoding = encoding;
 	}
 
-	int parent = commands.size() - 1;
+	unsigned int parent = commands.size();
 	unsigned int depth = parents.size();
 	Command::LiteralPayload payload;
 
@@ -161,7 +105,7 @@ void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::
 
 	{
 		//Set parent lengths
-		Command * parent = &commands[parents.back()];
+		Command * parent = &commands[parents.back()-1];
 		if (parent->type == Command::kDataList)
 			parent->payload.list_.length = &commands.back() - parent;
 		else if (parent->type == Command::kArrayElement)
@@ -176,17 +120,18 @@ void openddl::detail::ParserContext::push_array_type(Token const * type, Token c
 {
 
 	unsigned int depth = parents.size();
-	int parent;
+	unsigned int parent;
 	Command::DataArrayPayload payload;
 	payload.type = convert(*type);
 	payload.length = 0;
+	payload.dimension = 0;
 	if (parents.empty())
-		parent = -1;
+		parent = 0;
 	else
 	{
-		parent = &commands[parents.back()] - commands.data();
-		if (commands[parents.back()].type == Command::kStructure)
-			commands[parents.back()].payload.structure_.children++;
+		parent = &commands[parents.back()-1] - commands.data();
+		if (commands[parents.back()-1].type == Command::kStructure)
+			commands[parents.back()-1].payload.structure_.children++;
 	}
 		
 	if (name != nullptr)
@@ -197,35 +142,33 @@ void openddl::detail::ParserContext::push_array_type(Token const * type, Token c
 	dimension_size.encoding = Command::LiteralPayload::kInteger;
 
 	if (decode_literal(*dimensions, dimension_size) != 0 )
-	{
-
-		push_error("parse.array.index.decode_error");
-
-		payload.dimension = 0;
-	}
+		push_error("parse.array.invalid_index");
 	else
 	{
-			
-		payload.dimension = (uint32_t)dimension_size.value.integer_.value;
+		int code = detect_limits(Type::kUnsignedInt32, dimension_size);
+		if (code != 0)
+			push_error("parse.array.invalid_index");
+		else
+			payload.dimension = (uint32_t)dimension_size.value.integer_.value;
 	}
 	commands.emplace_back(payload, parent, depth);
-	parents.push_back(commands.size() - 1);
+	parents.push_back(commands.size());
 	
 	
 }
 
 void openddl::detail::ParserContext::push_array_element()
 {
-	Command & array = commands[parents.back()];
+	Command & array = commands[parents.back()-1];
 	unsigned int depth = parents.size();
-	int parent = parents.back();
+	unsigned int parent = parents.back();
 
 	Command::ArrayElementPayload payload;
 	payload.subindex = array.payload.array_.length;
 	array.payload.array_.length++;
 	payload.length = 0;
 	commands.emplace_back(payload, parent, depth);
-	parents.push_back(commands.size() - 1);
+	parents.push_back(commands.size());
 }
 
 void openddl::detail::ParserContext::end_array()
@@ -236,14 +179,14 @@ void openddl::detail::ParserContext::end_array()
 void openddl::detail::ParserContext::push_structure(Token const * identifier, Token const * name)
 {
 	unsigned int depth = parents.size();
-	int parent;
+	unsigned int parent;
 	if (parents.empty())
-		parent = -1;
+		parent = 0;
 	else
 	{
 		parent = parents.back();
-		if (commands[parents.back()].type == Command::kStructure)
-			commands[parents.back()].payload.structure_.children++;
+		if (commands[parents.back()-1].type == Command::kStructure)
+			commands[parents.back()-1].payload.structure_.children++;
 	}
 		
 	Command::StructurePayload payload;
@@ -255,13 +198,13 @@ void openddl::detail::ParserContext::push_structure(Token const * identifier, To
 	payload.properties = 0;
 	payload.children = 0;
 	commands.emplace_back(payload, parent, depth);
-	parents.push_back(commands.size() - 1);
+	parents.push_back(commands.size());
 	
 }
 void openddl::detail::ParserContext::push_property(Token const *ts, Token const * te)
 {
-	int parent = parents.back();
-	int depth = parents.size();
+	unsigned int parent = parents.back();
+	unsigned int depth = parents.size();
 	Command::PropertyPayload payload;
 	payload.identifier = new std::string(ts->payload);
 	Token const *value = ts + 1;
@@ -310,7 +253,7 @@ void openddl::detail::ParserContext::push_property(Token const *ts, Token const 
 		payload.value.reference_ = reference;
 		break;
 	}
-	commands[parents.back()].payload.structure_.properties++;
+	commands[parents.back()-1].payload.structure_.properties++;
 	commands.emplace_back(payload, parent, depth);
 }
 void openddl::detail::ParserContext::end_structure()

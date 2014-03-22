@@ -269,11 +269,11 @@ int openddl::detail::decode_literal(const openddl::detail::Token & t, openddl::d
 
 int openddl::detail::detect_limits(Type type, const Command::LiteralPayload & payload)
 {
-	
-	static const double float_limits[2][2] = 
-	{ 
-		{std::numeric_limits<float>::infinity(),std::numeric_limits<float>::max()} ,
-		{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::max()}
+
+	static const double float_limits[2][2] =
+	{
+		{ std::numeric_limits<float>::infinity(), std::numeric_limits<float>::max() },
+		{ std::numeric_limits<double>::infinity(), std::numeric_limits<double>::max() }
 	};
 	static const uint64_t integer_limits[8][2] =
 	{
@@ -338,4 +338,64 @@ int openddl::detail::detect_limits(Type type, const Command::LiteralPayload & pa
 	}
 	//Does not apply to this literal
 	return 0;
+}
+bool openddl::detail::encoding_mismatch(openddl::Type type, Command::LiteralPayload::encoding_t encoding)
+{
+	using openddl::detail::Command;
+	using openddl::Type;
+	switch (type)
+	{
+	case Type::kInt8:
+	case Type::kInt16:
+	case Type::kInt32:
+	case Type::kInt64:
+	case Type::kUnsignedInt8:
+	case Type::kUnsignedInt16:
+	case Type::kUnsignedInt32:
+	case Type::kUnsignedInt64:
+		if (encoding == Command::LiteralPayload::kInteger) return false; else return true;
+	case Type::kBool:
+		if (encoding == Command::LiteralPayload::kBoolean) return false; else return true;
+	case Type::kDouble:
+	case Type::kFloat:
+		if (encoding == Command::LiteralPayload::kFloat) return false; else return true;
+	case Type::kRef:
+		if (encoding == Command::LiteralPayload::kReference) return false; else return true;
+	case Type::kString:
+		if (encoding == Command::LiteralPayload::kString) return false; else return true;
+	case Type::kType:
+		if (encoding == Command::LiteralPayload::kType) return false; else return true;
+	default:
+		return true;
+	}
+}
+openddl::detail::Command::LiteralPayload::encoding_t openddl::detail::get_encoding(openddl::Type type)
+{
+	using namespace openddl;
+	using openddl::detail::Command;
+	switch (type)
+	{
+	case Type::kInt8:
+	case Type::kInt16:
+	case Type::kInt32:
+	case Type::kInt64:
+	case Type::kUnsignedInt8:
+	case Type::kUnsignedInt16:
+	case Type::kUnsignedInt32:
+	case Type::kUnsignedInt64:
+		return Command::LiteralPayload::kInteger;
+	case Type::kDouble:
+	case Type::kFloat:
+		return Command::LiteralPayload::kFloat;
+	case Type::kBool:
+		return Command::LiteralPayload::kBoolean;
+	case Type::kRef:
+		return Command::LiteralPayload::kReference;
+	case Type::kString:
+		return Command::LiteralPayload::kString;
+	case Type::kType:
+		return Command::LiteralPayload::kType;
+	default:
+		throw std::out_of_range("Type is out of range");
+	}
 }

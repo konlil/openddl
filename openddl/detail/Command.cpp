@@ -1,36 +1,36 @@
 #include "Command.h"
 
-openddl::detail::Command::Command(LiteralPayload & lit, int p, unsigned int d)
+openddl::detail::Command::Command(LiteralPayload & lit, unsigned int p, unsigned int d)
 : Command(kLiteral,p,d)
 {
 	payload.literal_ = lit;
 }
-openddl::detail::Command::Command(StructurePayload & s, int p, unsigned int d)
+openddl::detail::Command::Command(StructurePayload & s, unsigned int p, unsigned int d)
 : Command(kStructure, p, d)
 {
 	payload.structure_ = s;
 }
-openddl::detail::Command::Command(DataListPayload & list, int p, unsigned int d)
+openddl::detail::Command::Command(DataListPayload & list, unsigned int p, unsigned int d)
 : Command(kDataList, p, d)
 {
 	payload.list_ = list;
 }
-openddl::detail::Command::Command(DataArrayPayload & a, int p, unsigned int d)
+openddl::detail::Command::Command(DataArrayPayload & a, unsigned int p, unsigned int d)
 : Command(kDataArray, p, d)
 {
 	payload.array_ = a;
 }
-openddl::detail::Command::Command(ArrayElementPayload & e, int p, unsigned int d)
+openddl::detail::Command::Command(ArrayElementPayload & e, unsigned int p, unsigned int d)
 : Command(kArrayElement, p, d)
 {
 	payload.element_ = e;
 }
-openddl::detail::Command::Command(PropertyPayload & prop, int p, unsigned int d)
+openddl::detail::Command::Command(PropertyPayload & prop, unsigned int p, unsigned int d)
 : Command(kProperty, p, d)
 {
 	payload.property_ = prop;
 }
-openddl::detail::Command::Command(Type t, int p, unsigned int d)
+openddl::detail::Command::Command(Type t, unsigned int p, unsigned int d)
 : type(t), parent(p), depth(d) 
 {
 }

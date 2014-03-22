@@ -15,6 +15,15 @@ namespace openddl
 	private:
 		std::vector<detail::Error> _errors;
 	};
+	class SemanticError : public std::exception
+	{
+	public:
+		const char * what();
+		std::string errors();
+		SemanticError(std::vector<detail::Error> &e);
+	private:
+		std::vector<detail::Error> _errors;
+	};
 	class LexerError : public std::exception
 	{
 	public:
