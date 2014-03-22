@@ -78,7 +78,8 @@ void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::
 		if (commands.back().type == Command::kDataList)
 			type_encoding = get_encoding(commands.back().payload.list_.type);
 		else
-			type_encoding = get_encoding(commands[commands[parents.back()-1].parent-1].payload.array_.type);
+			type_encoding = get_encoding(commands[*(&parents.back() - 1) - 1].payload.array_.type);
+			
 		if (type_encoding == Command::LiteralPayload::kInteger && encoding == Command::LiteralPayload::kFloat
 			|| type_encoding == Command::LiteralPayload::kFloat && encoding == Command::LiteralPayload::kInteger)
 		{
