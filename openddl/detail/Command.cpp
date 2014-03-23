@@ -34,15 +34,15 @@ openddl::detail::Command::Command(Type t, unsigned int p, unsigned int d)
 : type(t), parent(p), depth(d) 
 {
 }
-
 openddl::detail::Command::Command(Command && rhs)
-{
-	//Used to fix union deletion bug in Release.
-	memset(&payload, 0, sizeof(payload));
+{	
+	
 	std::swap(type, rhs.type);
 	std::swap(depth, rhs.depth);
 	std::swap(parent, rhs.parent);
 	std::swap(payload, rhs.payload);	
+	//Used to fix union deletion bug in Release.
+	memset(&rhs.payload, 0, sizeof(rhs.payload));
 }
 
 //Internal helper functions for freeing memory used by payloads
@@ -103,16 +103,26 @@ void destroy(openddl::detail::Command::StructurePayload & structure){
 
 openddl::detail::Command::~Command()
 {
-	if(type == Command::kLiteral)
-		destroy(payload.literal_); 
-	else if(type == Command::kDataArray)
-		destroy(payload.array_); 
-	else if(type == Command::kDataList)
-		destroy(payload.list_); 
+	if (type == Command::kLiteral)
+	{
+		destroy(payload.literal_);
+	}
+	else if (type == Command::kDataArray)
+	{
+		destroy(payload.array_);
+	}
+	else if (type == Command::kDataList)
+	{
+		destroy(payload.list_);
+	}
 	else if (type == Command::kProperty)
-		destroy(payload.property_); 
+	{
+		destroy(payload.property_);
+	}
 	else if (type == Command::kStructure)
-		destroy(payload.structure_); 
+	{
+		destroy(payload.structure_);
+	}
 
 }
 

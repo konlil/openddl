@@ -109,19 +109,19 @@ int openddl::detail::read_escape_character(std::string & out, const std::string 
 		return 0;
 	}
 }
-std::string * openddl::detail::escape_string(const std::string & in)
+std::string openddl::detail::escape_string(const std::string & in)
 {
-	std::string * out = new std::string();
+	std::string out;
 	const int length = in.length() - 2;
 	for (int i = 1; i < length; i++)
 	{
 		const char character = in[i];
 		if (character == '\\')
-			i += read_escape_character(*out, in, i + 1);
+			i += read_escape_character(out, in, i + 1);
 		else
-			out->push_back(character);
+			out.push_back(character);
 	}
-	return out;
+	return std::move(out);
 }
 char openddl::detail::consume_character(const std::string & in, int & position)
 {
@@ -254,12 +254,6 @@ int openddl::detail::decode_literal(const openddl::detail::Token & t, openddl::d
 		default:
 			return -1;
 		}
-		break;
-	case Command::LiteralPayload::kString:
-		if (t.token_type == Token::kStringLiteral)
-			payload.value.string_ = new std::string(t.payload);
-		else
-			return -1;
 		break;
 	}
 	return 0;

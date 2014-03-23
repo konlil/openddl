@@ -43,7 +43,7 @@ using namespace openddl::detail;
 	boolean_literal = 11;
 	integer_literal = 17 | 13 | 14 | 15;
 	float_literal = 12 | 14 | 13 | 15;
-	string_literal = 16;
+	string_literal = 16+;
 	data_type = integer_type | float_type | ref_type | string_type | bool_type | type_type;
 	
 	

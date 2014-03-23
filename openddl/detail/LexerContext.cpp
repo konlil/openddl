@@ -34,16 +34,6 @@ void openddl::detail::LexerContext::lex_error(const std::string & name, const ch
 void openddl::detail::LexerContext::lex_emit(Token::token_t t_type, const char* ts, const char* te)
 {
 
-	if (t_type == Token::kStringLiteral && tokens.size() && tokens.back().token_type == Token::kStringLiteral)
-	{
-		//Concatenate two string literals if they are adjacent without intervening comma
-		Token & t = tokens.back();
-		t.payload = t.payload.substr(0, t.payload.length() - 1) + std::string(ts + 1, te);
-		t.range_length = (te - input.c_str()) - t.range_start;
-	}
-	else
-	{
-
 		//Create token on token stack
 		Token t;
 		t.token_type = t_type;
@@ -52,6 +42,4 @@ void openddl::detail::LexerContext::lex_emit(Token::token_t t_type, const char* 
 		t.range_length = te - ts;
 		t.line = line;
 		tokens.push_back(t);
-	}
-
 }

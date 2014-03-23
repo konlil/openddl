@@ -211,10 +211,10 @@ TEST_CASE("Lexer can identify the encoding of literals","[lex]"){
 		std::vector<openddl::detail::Token> tokens;
 		WHEN("the string is parsed"){
 			REQUIRE(openddl::detail::lex(input, tokens, errors));
-			THEN("Token should be emitted as a single string literal"){
+			THEN("Strings should be emitted as a seperate string literals"){
 				using namespace openddl::detail;
 				REQUIRE_FALSE(tokens.empty());
-				REQUIRE(tokens.size() == 1);
+				REQUIRE(tokens.size() == 2);
 				for (auto & t : tokens)
 				{
 					CHECK(t.token_type == Token::kStringLiteral);
