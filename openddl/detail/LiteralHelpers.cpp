@@ -112,7 +112,7 @@ int openddl::detail::read_escape_character(std::string & out, const std::string 
 std::string openddl::detail::escape_string(const std::string & in)
 {
 	std::string out;
-	const int length = in.length() - 2;
+	const int length = in.length() - 1;
 	for (int i = 1; i < length; i++)
 	{
 		const char character = in[i];
