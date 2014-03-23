@@ -35,16 +35,11 @@ int openddl::detail::ParserContext::build_literal(Command::LiteralPayload::encod
 	else if (encoding == Command::LiteralPayload::kString)
 	{
 		Token const * i = ts;
-		std::vector<std::string> string_builder;
 		std::string * string = new std::string();
 		while (i <= te && (i->token_type == Token::kStringLiteral))
 		{
-			string_builder.emplace_back(i->payload);
+			string->append(escape_string(i->payload));
 			i++;
-		}
-		for (const std::string & s : string_builder)
-		{
-			string->append(escape_string(s));
 		}
 		payload.value.string_ = string;
 		return i - ts;
