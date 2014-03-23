@@ -38,7 +38,7 @@ int openddl::detail::ParserContext::build_literal(Command::LiteralPayload::encod
 		std::string * string = new std::string();
 		while (i <= te && (i->token_type == Token::kStringLiteral))
 		{
-			string->append(escape_string(i->payload));
+			string->append(escape_string(errors,i->payload));
 			i++;
 		}
 		payload.value.string_ = string;

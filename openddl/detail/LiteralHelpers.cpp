@@ -109,7 +109,8 @@ int openddl::detail::read_escape_character(std::string & out, const std::string 
 		return 0;
 	}
 }
-std::string openddl::detail::escape_string(const std::string & in)
+//TODO: Implement string literal validation & error logging
+std::string openddl::detail::escape_string(std::vector<Error> & errors, const std::string & in)
 {
 	std::string out;
 	const int length = in.length() - 1;
