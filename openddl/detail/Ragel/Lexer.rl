@@ -40,7 +40,6 @@
 		//Skip forward to end of file
 		fexec(pe); fbreak;
 	}
-	recover_string_literal := ^'"'+ '"' >{ char_error = p;} @invalid_character_error @/unterminated_string_literal;
 
 	newline = '\n' 
 		%{ context.new_line(p);};
@@ -113,7 +112,7 @@
 	
 
 		# String Literals
-		('"' ( any - [\n"] | newline )* :>> '"' @/unterminated_string_literal) => { token(Token::kStringLiteral);};
+		('"' ( any - [\n"] | ('\\"' ${ fexec(p+2); }) | newline )* :>> '"' @/unterminated_string_literal) => { token(Token::kStringLiteral);};
 
 
 		# Character token

@@ -4,7 +4,6 @@
 #include "../openddl/detail/Token.h"
 #include "../openddl/detail/Error.h"
 
-
 TEST_CASE("lexer will catch common comment formatting errors", "[lex]"){
 	GIVEN("An unterminated block comment"){
 		std::string input = "/* ";
@@ -70,6 +69,7 @@ TEST_CASE("Lexer will handle properly formatted comments", "[lex]"){
 	}
 }
 TEST_CASE("Lexer will handle type declarations", "[lex]"){
+	
 	GIVEN("A sequence of valid type names"){
 		std::string input = "bool float double int8 int16 int32 int64\n" 
 			"unsigned_int8 unsigned_int16 unsigned_int32\n"
@@ -118,8 +118,10 @@ TEST_CASE("Lexer will handle type declarations", "[lex]"){
 			}
 		}
 	}	
+	
 }
 TEST_CASE("Lexer can identify the encoding of literals","[lex]"){
+	
 	GIVEN("A sequence of binary literals"){
 		std::string input = "0b11 +0B11 -0B00";
 		std::vector<openddl::detail::Error> errors;
@@ -242,8 +244,10 @@ TEST_CASE("Lexer can identify the encoding of literals","[lex]"){
 			}
 		}
 	}
+	
 }
 TEST_CASE("Lexer can handle improperly formatted literals", "[lex]"){
+	
 	GIVEN("An unterminated string"){
 		std::string input = "\" abcd";
 		std::vector<openddl::detail::Error> errors;
@@ -304,6 +308,22 @@ TEST_CASE("Lexer can handle improperly formatted literals", "[lex]"){
 			}
 		}
 	}
+	
+	GIVEN("A string literal with escaped characters"){
+		std::string input = "\" \\\" \"";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		WHEN("the string is parsed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("No errors should be emitted"){
+				using namespace openddl::detail;
+				REQUIRE_FALSE(tokens.empty());
+				REQUIRE(errors.empty());
+
+			}
+		}
+	}
+	
 	GIVEN("A sequence of error literals"){
 		std::string input = "0b1222 0xAZX 99AT 30.0Y";
 		std::vector<openddl::detail::Error> errors;
@@ -320,5 +340,5 @@ TEST_CASE("Lexer can handle improperly formatted literals", "[lex]"){
 			}
 		}
 	}
-
+	
 }
