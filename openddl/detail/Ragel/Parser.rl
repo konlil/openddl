@@ -1,6 +1,7 @@
 #include "ParserContext.h"
 
 using namespace openddl::detail;
+#include <iostream>
 
 
 %%{
@@ -48,7 +49,10 @@ using namespace openddl::detail;
 	
 	
 	name = global_name | local_name;
-	reference = null_name | local_name+ | global_name (local_name)*;
+
+	reference = (null_name | local_name+ | global_name (local_name)*);
+	
+	
 
 	literal = boolean_literal | integer_literal | float_literal | string_literal | data_type | reference;
 
@@ -59,16 +63,17 @@ using namespace openddl::detail;
 	#TODO: Provide invalid Reference Literal Specific Error
 	#TODO: Completely eliminate back tracking for error recovery within literal_sequence
 	literal_sequence := |*
-		(left_brace boolean_literal (comma boolean_literal)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kBoolean,ts,te); fret;};
-		(left_brace float_literal (comma float_literal)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kFloat,ts,te); fret;};
-		(left_brace integer_literal (comma integer_literal)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kInteger,ts,te); fret;};
+		(left_brace boolean_literal (comma boolean_literal)* right_brace)  => {context.push_literal_list(Command::LiteralPayload::kBoolean,ts,te); fret;};
+		(left_brace float_literal (comma float_literal)* right_brace)  => {context.push_literal_list(Command::LiteralPayload::kFloat,ts,te); fret;};
+		(left_brace integer_literal (comma integer_literal)* right_brace)  => {context.push_literal_list(Command::LiteralPayload::kInteger,ts,te); fret;};
 		
-		(left_brace string_literal (comma string_literal)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kString,ts,te); fret;};
+		(left_brace string_literal (comma string_literal)* right_brace)  => {context.push_literal_list(Command::LiteralPayload::kString,ts,te); fret;};
 		(left_brace reference (comma reference)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kReference,ts,te); fret;};
 		(left_brace data_type (comma data_type)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kType,ts,te); fret;};
 
 		left_brace => {context.push_error("parse.unexpected_end_of_file");};
 		left_brace literal (comma literal)* literal => {context.push_error("parse.data_list.missing_comma");};
+		left_brace (name|null_name)+ (comma (name|null_name)+)* right_brace => { context.push_error("parse.list.illegal_reference");};
 		left_brace literal (comma literal)* right_brace => { context.push_error("semantic.literal.type_mismatch");};
 	*|;
 	data_array := |*

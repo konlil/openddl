@@ -111,7 +111,7 @@
 		
 	
 
-		# String Literals
+		# String Literals : Skip forward one character if we encounter an escaped double quote
 		('"' ( any - [\n"] | ('\\"' ${ fexec(p+2); }) | newline )* :>> '"' @/unterminated_string_literal) => { token(Token::kStringLiteral);};
 
 

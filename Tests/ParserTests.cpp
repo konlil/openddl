@@ -5,7 +5,6 @@
 #include "../openddl/detail/Token.h"
 #include "../openddl/detail/Error.h"
 
-
 TEST_CASE("Parsing Data Lists", "[parse]"){
 	
 	GIVEN("Valid OpenDDL literal lists"){
@@ -106,6 +105,7 @@ TEST_CASE("Parsing Data Lists", "[parse]"){
 			}
 		}
 	}
+	
 	GIVEN("Non homogenous data list"){
 		std::string input = "bool { false , 99 } ";
 		std::vector<openddl::detail::Error> errors;
@@ -139,6 +139,7 @@ TEST_CASE("Parsing Data Lists", "[parse]"){
 					REQUIRE_FALSE(openddl::detail::parse(tokens, commands, errors));
 					THEN("should have errors"){
 						REQUIRE_FALSE(errors.empty());
+						CHECK(errors[0].message == "parse.list.illegal_reference");
 					}
 				}
 			}
@@ -287,3 +288,5 @@ TEST_CASE("Parsing data structures", "[parse]"){
 		}
 	}
 }
+
+
