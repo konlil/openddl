@@ -77,7 +77,7 @@ using namespace openddl::detail;
 		left_brace literal (comma? literal)* right_brace => {context.push_error("parse.data_list.missing_comma");};
 
 		#Fallback path for illegal literals
-		left_brace (any-right_brace)*=> {context.push_error("parse.illegal_token"); fbreak;};
+		left_brace (any-right_brace)*=> {context.push_error("parse.illegal_token"); top = 0; fbreak;};
 
 		
 		
@@ -86,6 +86,9 @@ using namespace openddl::detail;
 		left_brace => { context.push_array_element(); fhold; fcall literal_sequence;};
 		comma;	
 		right_brace => { context.end_array(); fret;};
+
+		#Fallback path for illegal token
+		any => { context.push_error("parse.illegal_token"); top = 0; fbreak; };
 		
 	*|;
 	structure_property_list := |* 
@@ -93,8 +96,11 @@ using namespace openddl::detail;
 		comma;
 		right_bracket left_brace => {fgoto structure;};
 		(data_type | identifier) => {fhold; fgoto structure;};
-		left_bracket right_bracket left_brace => { fgoto structure;};
+		#left_bracket right_bracket left_brace => { fgoto structure;};
 		left_bracket;
+		right_bracket any-left_brace => { context.push_error("parse.illegal_token"); top = 0; fbreak; };
+		#Fallback path for illegal token
+		any => { context.push_error("parse.illegal_token"); top = 0; fbreak; };
 	*|;
 	structure := |*	
 		data_type name? left_brace => { 
@@ -125,9 +131,9 @@ using namespace openddl::detail;
 					context.push_structure(ts);
 				fcall structure_property_list;
 				};
-		right_brace => {
-			if( top!=0) {context.end_structure(); fret;}
-		};
+		right_brace => { if( top!=0) {context.end_structure(); fret; } };
+		#Fallback path for illegal token
+		any => { context.push_error("parse.illegal_token"); top = 0; fbreak; };
 	*|;
 	
 }%%

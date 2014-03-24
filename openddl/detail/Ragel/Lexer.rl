@@ -31,6 +31,11 @@
 	}
 	recover_character_literal := ^"'"+ "'" >{ char_error = p;} @invalid_character_error @/unterminated_character_literal;
 
+	#Only reason this will be triggered is if we encounter the \" sequence without a terminating double quote
+	action on_escaped_quote{
+		if(*p == '\\' && *(p+1)=='"') {fexec(p+2);}
+	}
+
 	action unterminated_string_literal{
 		error("lex.unterminated_string_literal");
 		fbreak;
@@ -81,7 +86,7 @@
 		binary_literal		=>	{ token(Token::kBinaryLiteral);};
 		float_literal		=>	{ token(Token::kFloatLiteral);};
 		#Fallback rule to catch improperly formatted numeric literals
-		(decimal_literal|hex_literal|binary_literal|float_literal) ^(0x01..0x20|[},\]])+ 
+		(decimal_literal|hex_literal|binary_literal|float_literal) ^(0x01..0x20|[=)},\]])+ 
 							=> { error("lex.invalid_literal");};
 
 		#Boolean Literal
@@ -112,7 +117,7 @@
 	
 
 		# String Literals : Skip forward one character if we encounter an escaped double quote
-		('"' ( any - [\n"] | ('\\"' ${ fexec(p+2); }) | newline )* :>> '"' @/unterminated_string_literal) => { token(Token::kStringLiteral);};
+		('"' ( any - [\n"] | ('\\"' >on_escaped_quote) | newline )* :>> '"' @/unterminated_string_literal) => { token(Token::kStringLiteral);};
 
 
 		# Character token

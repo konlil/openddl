@@ -30,7 +30,7 @@ struct Context
 			//Create parent index mapping if it does not exist
 			if (parent_map == local_names.end())
 				parent_map = local_names.emplace(parent, std::map < std::string, unsigned int>()).first;
-			auto name_map = parent_map->second;
+			auto & name_map = parent_map->second;
 			if (name_map.find(name) == name_map.end())
 				name_map.emplace(name, index);
 			else

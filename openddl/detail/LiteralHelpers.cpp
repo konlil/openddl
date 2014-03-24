@@ -234,6 +234,9 @@ void openddl::detail::validate_string(std::vector<Error> & errors, std::string &
 					i += position+1;
 				}
 				break;
+			default:
+				push_error("parse.string.invalid_character");
+				break;
 			}
 		}
 		else if (character = decode_utf8(in,i,token_length))

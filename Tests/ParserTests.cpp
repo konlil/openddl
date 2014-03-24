@@ -4,6 +4,48 @@
 #include "../openddl/detail/Command.h"
 #include "../openddl/detail/Token.h"
 #include "../openddl/detail/Error.h"
+TEST_CASE("String Literal Lists", "[parse]")
+{
+	GIVEN("Valid string list"){
+		std::string input = "string { \" \" }";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		std::vector<openddl::detail::Command> commands;
+		WHEN("the string is parsed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("should have no errors"){
+				REQUIRE(errors.empty());
+				AND_WHEN("the token stream is parsed"){
+					REQUIRE(openddl::detail::parse(tokens, commands, errors));
+					THEN("should have no errors"){
+						REQUIRE(errors.empty());
+					}
+				}
+			}
+		}
+	}
+	GIVEN("Strings with illegal characters"){
+		std::string input = "string { \" \x5C  \x15 \" }";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		std::vector<openddl::detail::Command> commands;
+		WHEN("the string is parsed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("should have no errors"){
+				REQUIRE(errors.empty());
+				AND_WHEN("the token stream is parsed"){
+					REQUIRE_FALSE(openddl::detail::parse(tokens, commands, errors));
+					THEN("should have errors"){
+						REQUIRE(errors.size() == 2);
+						CHECK(errors[0].message == "parse.string.invalid_character");
+						CHECK(errors[1].message == "parse.string.invalid_character");
+					}
+				}
+			}
+		}
+	}
+	
+}
 
 TEST_CASE("Parsing Data Lists", "[parse]"){
 	
@@ -211,6 +253,7 @@ TEST_CASE("Parsing data structures", "[parse]"){
 			}
 		}
 	}
+
 	GIVEN("OpenDDL Structures with properties"){
 		std::string input = "Hello (hello = true){} Hello (hello = true,goodbye = 'abcd'){}  Hello $name (){}";
 		std::vector<openddl::detail::Error> errors;
@@ -230,6 +273,26 @@ TEST_CASE("Parsing data structures", "[parse]"){
 			}
 		}
 	}
+	GIVEN("Illegal token following property list"){
+		std::string input = "Hello(hello = 1, world = 1) $name {}";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		std::vector<openddl::detail::Command> commands;
+		WHEN("the string is parsed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("should have no errors"){
+				REQUIRE(errors.empty());
+				AND_WHEN("the token stream is parsed"){
+					REQUIRE_FALSE(openddl::detail::parse(tokens, commands, errors));
+					THEN("should have errors"){
+						REQUIRE(errors.size() == 1);
+						CHECK(errors[0].message == "parse.illegal_token");
+					}
+				}
+			}
+		}
+	}
+	
 	GIVEN("Valid OpenDDL structures"){
 		std::string input = "Hello {string {\"Hello\"}} Hello $name {int8{1} float{99}}";
 		std::vector<openddl::detail::Error> errors;
@@ -288,5 +351,3 @@ TEST_CASE("Parsing data structures", "[parse]"){
 		}
 	}
 }
-
-

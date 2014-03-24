@@ -11,9 +11,6 @@ namespace openddl
 		Type convert(const Token & t);
 		void encode_utf8(std::string & out, const char32_t token);
 		char32_t decode_utf8(const std::string & token, const unsigned int index, unsigned int & length);
-		
-		int read_escape_character(std::string & out, const std::string & token, const int index);
-		std::string escape_string(const std::string & in);
 
 		void validate_string(std::vector<Error> & errors, std::string & out, const std::string & in);
 

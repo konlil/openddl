@@ -68,6 +68,20 @@ TEST_CASE("Lexer will handle properly formatted comments", "[lex]"){
 		}
 	}
 }
+TEST_CASE("Lexer can handle real world openddl structure declarations"){
+	GIVEN("Empty structure with name and properties"){
+		std::string input = "Hello $name ( hello=1 ){ }";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		WHEN("the string is parsed"){
+			REQUIRE(openddl::detail::lex(input, tokens, errors));
+			THEN("Lexing should succeed"){
+				using namespace openddl::detail;
+				REQUIRE_FALSE(tokens.empty());
+			}
+		}
+	}
+}
 TEST_CASE("Lexer will handle type declarations", "[lex]"){
 	
 	GIVEN("A sequence of valid type names"){
@@ -337,6 +351,18 @@ TEST_CASE("Lexer can handle improperly formatted literals", "[lex]"){
 				for (auto & e : errors){
 					CHECK(errors[0].message == "lex.invalid_literal");
 				}
+			}
+		}
+	}
+	GIVEN("Unterminated string literal (via escaped character)"){
+		std::string input = "\"\x5C\" ";
+		std::vector<openddl::detail::Error> errors;
+		std::vector<openddl::detail::Token> tokens;
+		WHEN("the string is parsed"){
+			REQUIRE_FALSE(openddl::detail::lex(input, tokens, errors));
+			THEN("should have no errors"){
+				REQUIRE_FALSE(errors.empty());
+				CHECK(errors[0].message == "lex.unterminated_string_literal");
 			}
 		}
 	}
