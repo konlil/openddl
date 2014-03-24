@@ -104,7 +104,7 @@ void openddl::detail::ParserContext::push_literal_list(Command::LiteralPayload::
 		type_encoding = encoding;
 	}
 
-	unsigned int parent = commands.size();
+	unsigned int parent = parents.back();
 	unsigned int depth = parents.size();
 	Command::LiteralPayload payload;
 
@@ -142,7 +142,7 @@ void openddl::detail::ParserContext::push_array_type(Token const * type, Token c
 		parent = 0;
 	else
 	{
-		parent = &commands[parents.back()-1] - commands.data();
+		parent = parents.back();
 		if (commands[parents.back()-1].type == Command::kStructure)
 			commands[parents.back()-1].payload.structure_.children++;
 	}

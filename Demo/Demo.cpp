@@ -4,6 +4,8 @@
 #include <fstream>
 #include <streambuf>
 #include <iostream>
+#include "..\openddl\Object.h"
+#include "..\openddl\Visitor.h"
 
 
 std::string read_file(const char * name)
@@ -20,6 +22,28 @@ std::string read_file(const char * name)
 	}
 	return std::move(out);
 }
+struct RootVisitor : public openddl::Visitor
+{
+	std::string format;
+	void visit(openddl::Structure & structure) {
+		std::cout << format << "Structure( "<< structure.identifier() << " )";
+		if (structure.has_name())
+			std::cout << " with name " << structure.name();
+		std::cout << std::endl;
+		format.push_back(' ');
+		format.push_back(' ');
+		structure.visit_properties([&](const openddl::Property&){ std::cout << format << "-Property" << std::endl; });
+		structure.visit_children(*this);
+		format.pop_back();
+		format.pop_back();
+	}
+	void visit(openddl::DataList & data_list) {
+		std::cout << format << "Data List" << std::endl;
+	}
+	void visit(openddl::DataArrayList & data_array_list) {
+		std::cout << format << "Data Array" << std::endl;
+	}
+};
 int main(int argc, char * argv[])
 {
 
@@ -30,6 +54,8 @@ int main(int argc, char * argv[])
 		try{
 			openddl::Tree tree = openddl::Tree::parse(input);
 			std::cout << "Success" << std::endl;
+			auto v = RootVisitor();
+			tree.visit_children(v);
 		}
 		catch (openddl::LexerError & e){
 			std::cout << e.what() << std::endl;

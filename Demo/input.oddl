@@ -21,12 +21,12 @@ GeometryNode $node1
 		}
 	}
 }
+
 GeometryNode $node2
 {
 	Name {string {"Box002"}}
 	ObjectRef {ref {$geometry1}}
 	MaterialRef {ref {$material1}}
-
 	Transform
 	{
 		float[16]
@@ -37,6 +37,7 @@ GeometryNode $node2
 			 0x43041438, 0x411804DE, 0x00000000, 0x3F800000}		//  132.079, 9.50119, 0, 1}
 		}
 	}
+
 }
 
 GeometryObject $geometry1		// Box001, Box002

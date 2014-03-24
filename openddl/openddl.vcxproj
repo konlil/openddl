@@ -88,10 +88,12 @@
     <ClInclude Include="detail\ParserContext.h" />
     <ClInclude Include="detail\Token.h" />
     <ClInclude Include="exception.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tree.h" />
     <ClInclude Include="Type.h" />
+    <ClInclude Include="Visitor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="detail\Command.cpp" />
@@ -102,6 +104,7 @@
     <ClCompile Include="detail\ParserContext.cpp" />
     <ClCompile Include="detail\SemanticChecker.cpp" />
     <ClCompile Include="exception.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Tree.cpp" />
   </ItemGroup>
