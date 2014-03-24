@@ -23,7 +23,7 @@ GeometryNode $node1
 }
 GeometryNode $node2
 {
-	Name {string {"Box""002"}}
+	Name {string {"Box002"}}
 	ObjectRef {ref {$geometry1}}
 	MaterialRef {ref {$material1}}
 

@@ -10,8 +10,13 @@ namespace openddl
 	{
 		Type convert(const Token & t);
 		void encode_utf8(std::string & out, const char32_t token);
+		char32_t decode_utf8(const std::string & token, const unsigned int index, unsigned int & length);
+		
 		int read_escape_character(std::string & out, const std::string & token, const int index);
-		std::string escape_string(std::vector<Error> & errors, const std::string & in);
+		std::string escape_string(const std::string & in);
+
+		void validate_string(std::vector<Error> & errors, std::string & out, const std::string & in);
+
 		char consume_character(const std::string & in, int & position);
 		uint64_t decode_integer(Token::token_t type, const std::string & in, bool & negate);
 		//Return 1 if decoded literal would cause out of range return -1 if type mismatch

@@ -1,5 +1,6 @@
 #include "LiteralHelpers.h"
 #include "../Type.h"
+#include "Error.h"
 //Helper function
 openddl::Type openddl::detail::convert(const openddl::detail::Token & t)
 {
@@ -23,6 +24,64 @@ openddl::Type openddl::detail::convert(const openddl::detail::Token & t)
 	case Token::kType: return Type::kType;
 	}
 	throw std::out_of_range("Token enum was not type value");
+}
+char32_t openddl::detail::decode_utf8(const std::string & token, const unsigned int index, unsigned int & length)
+{
+	unsigned int token_length = token.length()-1;
+	char32_t value = 0;
+	// 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+	if ((token[index] & 0xFC) == 0xFC)
+	{
+		if ((token_length - index) < 6) return 0;
+		value = ((token[index] & 0x01) << 30) | ((token[index + 1] & 0x3F) << 24)
+			| ((token[index + 2] & 0x3F) << 18) | ((token[index + 3]
+			& 0x3F) << 12)
+			| ((token[index + 4] & 0x3F) << 6) | (token[index + 5] & 0x3F);
+		length = 6;
+	}
+	// 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+	else if ((token[index] & 0xF8) == 0xF8)
+	{
+		if ((token_length - index) < 5) return 0;
+		value = ((token[index] & 0x03) << 24) | ((token[index + 1]
+			& 0x3F) << 18)
+			| ((token[index + 2] & 0x3F) << 12) | ((token[index + 3]
+			& 0x3F) << 6)
+			| (token[index + 4] & 0x3F);
+		length = 5;
+	}
+	// 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+	else if ((token[index] & 0xF0) == 0xF0)
+	{
+		if ((token_length - index) <4) return 0;
+		value = ((token[index] & 0x07) << 18) | ((token[index + 1]
+			& 0x3F) << 12)
+			| ((token[index + 2] & 0x3F) << 6) | (token[index + 3] & 0x3F);
+		length = 4;
+	}
+	// 1110xxxx 10xxxxxx 10xxxxxx
+	else if ((token[index] & 0xE0) == 0xE0)
+	{
+		if ((token_length - index) < 3) return 0;
+		value = ((token[index] & 0x0F) << 12) | ((token[index + 1] & 0x3F) << 6)
+			| (token[index + 2] & 0x3F);
+		length = 3;
+	}
+	// 110xxxxx 10xxxxxx
+	else if ((token[index] & 0xC0) == 0xC0)
+	{
+		if ((token_length - index) < 2) return 0;
+		value = ((token[index] & 0x1F) << 6) | (token[index + 1] & 0x3F);
+		length = 2;
+	}
+	// 0xxxxxxx
+	else if (token[index] < 0x80)
+	{
+		if ((token_length - index) < 1) return 0;
+		value = token[index];
+		length = 1;
+	}
+	return value;
 }
 void openddl::detail::encode_utf8(std::string & out, const char32_t token)
 {
@@ -109,21 +168,128 @@ int openddl::detail::read_escape_character(std::string & out, const std::string 
 		return 0;
 	}
 }
-//TODO: Implement string literal validation & error logging
-std::string openddl::detail::escape_string(std::vector<Error> & errors, const std::string & in)
+
+bool accept_character(char32_t character)
 {
-	std::string out;
-	const int length = in.length() - 1;
-	for (int i = 1; i < length; i++)
-	{
-		const char character = in[i];
-		if (character == '\\')
-			i += read_escape_character(out, in, i + 1);
-		else
-			out.push_back(character);
-	}
-	return std::move(out);
+	if (character == 0x20)
+		return true;
+	else if (character == 0x21)
+		return true;
+	else if (character <= 0x5B && character >= 0x23)
+		return true;
+	else if (character <= 0x7E && character >= 0x5D)
+		return true;
+	else if (character <= 0xD7FF && character >= 0xA0)
+		return true;
+	else if (character <= 0xFFFD && character >= 0xE000)
+		return true;
+	else if (character <= 0x10FFFF && character >= 0x10000)
+		return true;
+	return false;
 }
+//Don't worry about validating presence of enclosing double quotes
+void openddl::detail::validate_string(std::vector<Error> & errors, std::string & out, const std::string & in)
+{
+	auto push_error = [&](const std::string & msg){Error e; e.message = msg; errors.push_back(e); };
+	unsigned int token_length = 0;
+	unsigned int length = in.length() -1;
+	for (unsigned int i = 1; i < length; i++)
+	{
+		char32_t character;
+		if (in[i] == '\\')
+		{
+			switch (in[i + 1])
+			{
+			case '"':
+				out.push_back('"'); i++;
+				break;
+			case '\'':
+				out.push_back('\''); i++;
+				break;
+			case '?':
+				out.push_back('?'); i++;
+				break;
+			case '\\':
+				out.push_back('\\'); i++;
+				break;
+			case 'a':
+				out.push_back('\a'); i++;
+				break;
+			case 'b':
+				out.push_back('\b'); i++;
+				break;
+			case 'f':
+				out.push_back('\f'); i++;
+				break;
+			case 'n':
+				out.push_back('\n'); i++;
+				break;
+			case 'r':
+				out.push_back('\r'); i++;
+				break;
+			case 't':
+				out.push_back('\t'); i++;
+				break;
+			case 'v':
+				out.push_back('\v'); i++;
+				break;
+			case 'x':
+				if (length - i < 4)
+					push_error("parse.string.invalid_character");
+				else
+				{
+					size_t position = 0;
+					character = std::stoi(in.substr(i + 2, 2), &position, 16);
+					if (position == 2)
+						encode_utf8(out, character);
+					else
+						push_error("parse.string.invalid_character");
+					i += position+1;
+				}
+				break;
+			case 'u':
+				if (length- i < 6)
+					push_error("parse.string.invalid_character");
+				else
+				{
+					size_t position = 0;
+					character = std::stoi(in.substr(i + 2, 4), &position, 16);
+					if (position == 4)
+						encode_utf8(out, character);
+					else
+						push_error("parse.string.invalid_character");
+					i += position+1;
+				}
+				break;
+			case 'U':
+				if (length - i < 8)
+					push_error("parse.string.invalid_character");
+				else
+				{
+					size_t position = 0;
+					character = std::stoi(in.substr(i + 2, 6), &position, 16);
+					if (position == 6)
+						encode_utf8(out, character);
+					else
+						push_error("parse.string.invalid_character");
+					i += position+1;
+				}
+				break;
+			}
+		}
+		else if (character = decode_utf8(in,i,token_length))
+		{
+			if (accept_character(character))
+				encode_utf8(out, character);
+			else
+				push_error("parse.string.invalid_character");
+			i += token_length-1;
+		}
+		else
+			push_error("parse.string.invalid_character");
+	}
+}
+
 char openddl::detail::consume_character(const std::string & in, int & position)
 {
 	char value = 0;
