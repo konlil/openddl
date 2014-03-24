@@ -304,21 +304,6 @@ TEST_CASE("Lexer can handle improperly formatted literals", "[lex]"){
 			}
 		}
 	}
-	GIVEN("A string literal with invalid characters"){
-		std::string input = "\" abcd\\c\"";
-		std::vector<openddl::detail::Error> errors;
-		std::vector<openddl::detail::Token> tokens;
-		WHEN("the string is parsed"){
-			REQUIRE_FALSE(openddl::detail::lex(input, tokens, errors));
-			THEN("Errors should be emitted"){
-				using namespace openddl::detail;
-				REQUIRE(tokens.empty());
-				REQUIRE_FALSE(errors.empty());
-				CHECK(errors[0].message == "lex.invalid_character");
-
-			}
-		}
-	}
 	GIVEN("A sequence of error literals"){
 		std::string input = "0b1222 0xAZX 99AT 30.0Y";
 		std::vector<openddl::detail::Error> errors;

@@ -126,48 +126,7 @@ void openddl::detail::encode_utf8(std::string & out, const char32_t token)
 	}
 
 }
-int openddl::detail::read_escape_character(std::string & out, const std::string & token, const int index)
-{
-	switch (token[index])
-	{
-	case '"':
-		out.push_back('"'); return 1;
-	case '\'':
-		out.push_back('\''); return 1;
-	case '?':
-		out.push_back('?'); return 1;
-	case '\\':
-		out.push_back('\\'); return 1;
-	case 'a':
-		out.push_back('\a'); return 1;
-	case 'b':
-		out.push_back('\b'); return 1;
-	case 'f':
-		out.push_back('\f'); return 1;
-	case 'n':
-		out.push_back('\n'); return 1;
-	case 'r':
-		out.push_back('\r'); return 1;
-	case 't':
-		out.push_back('\t'); return 1;
-	case 'v':
-		out.push_back('\v'); return 1;
-	case 'u':
-	{
-		const char32_t code_point = std::stoi(token.substr(index + 1, 4), nullptr, 16);
-		encode_utf8(out, code_point);
-		return 5;
-	}
-	case 'U':
-	{
-		const char32_t code_point = std::stoi(token.substr(index + 1, 6), nullptr, 16);
-		encode_utf8(out, code_point);
-		return 7;
-	}
-	default:
-		return 0;
-	}
-}
+
 
 bool accept_character(char32_t character)
 {

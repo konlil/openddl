@@ -6,6 +6,7 @@
 #include "..\stdafx.h"
 #include "detail.h"
 #include "LexerContext.h"
+#include <iostream>
 
 #define error(m) context.lex_error(m,ts,te)
 
@@ -20,6 +21,7 @@
 
 	action count_character { context.count_character();}
 	action reset_count { context.reset_count(); }
+	
 	action invalid_character_error {
 		context.lex_error("lex.invalid_character",te-1,p+1); 
 		fgoto main;
@@ -30,7 +32,8 @@
 	recover_character_literal := ^"'"+ "'" >{ char_error = p;} @invalid_character_error @/unterminated_character_literal;
 
 	action unterminated_string_literal{
-		context.lex_error("lex.unterminated_string_literal",te-1,p+1);
+		error("lex.unterminated_string_literal");
+		fbreak;
 	}
 	action unterminated_block_comment{
 		error("lex.unterminated_block_comment"); 
@@ -71,7 +74,6 @@
 
 
 	identifier = (alpha | '_' ) (alnum | '_')* - data_type -'null';
-	name = [$%] identifier;
 	main := 
 	|*
 		# Numeric Literals
@@ -111,10 +113,8 @@
 	
 
 		# String Literals
-		'"' (utf8|escape_char|'\\u' xdigit{4}|'\\U' xdigit{6})* :>> '"' 
-							=> { token(Token::kStringLiteral);};
-		# Fallback path for catching errors
-		'"'					=> { fgoto recover_string_literal;};
+		('"' ( any - [\n"] | newline )* :>> '"' @/unterminated_string_literal) => { token(Token::kStringLiteral);};
+
 
 		# Character token
 		character_literal	=> { if(context.get_character_count() > 7) error("lex.character_length_error"); else token(Token::kCharacterLiteral);}; 
