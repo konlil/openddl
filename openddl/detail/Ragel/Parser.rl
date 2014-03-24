@@ -8,12 +8,15 @@ using namespace openddl::detail;
 	
 	machine Parser;
 	getkey p->token_type;
-	alphtype unsigned int;
+	alphtype int;
 	write data;
 
 	prepush {
-		if(top > stack.capacity()-1)
+		if(top > (int)stack.capacity()-1)
 			stack.resize(stack.capacity()*2,-1);
+	}
+	action on_end_of_file{
+		context.push_error("parse.unexpected_end_of_file");
 	}
 
 	left_square = 1;
@@ -60,21 +63,24 @@ using namespace openddl::detail;
 
 	array_notation = data_type left_square integer_literal right_square;
 
-	#TODO: Provide invalid Reference Literal Specific Error
-	#TODO: Completely eliminate back tracking for error recovery within literal_sequence
 	literal_sequence := |*
-		(left_brace boolean_literal (comma boolean_literal)* right_brace)  => {context.push_literal_list(Command::LiteralPayload::kBoolean,ts,te); fret;};
-		(left_brace float_literal (comma float_literal)* right_brace)  => {context.push_literal_list(Command::LiteralPayload::kFloat,ts,te); fret;};
-		(left_brace integer_literal (comma integer_literal)* right_brace)  => {context.push_literal_list(Command::LiteralPayload::kInteger,ts,te); fret;};
+		((left_brace boolean_literal (comma boolean_literal)* right_brace) @/on_end_of_file)  => {context.push_literal_list(Command::LiteralPayload::kBoolean,ts,te); fret;};
+		((left_brace float_literal (comma float_literal)* right_brace) @/on_end_of_file) => {context.push_literal_list(Command::LiteralPayload::kFloat,ts,te); fret;};
+		((left_brace integer_literal (comma integer_literal)* right_brace) @/on_end_of_file) => {context.push_literal_list(Command::LiteralPayload::kInteger,ts,te); fret;};
 		
-		(left_brace string_literal (comma string_literal)* right_brace)  => {context.push_literal_list(Command::LiteralPayload::kString,ts,te); fret;};
-		(left_brace reference (comma reference)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kReference,ts,te); fret;};
-		(left_brace data_type (comma data_type)* right_brace) => {context.push_literal_list(Command::LiteralPayload::kType,ts,te); fret;};
+		((left_brace string_literal (comma string_literal)* right_brace) @/on_end_of_file) => {context.push_literal_list(Command::LiteralPayload::kString,ts,te); fret;};
+		((left_brace reference (comma reference)* right_brace) @/on_end_of_file)=> {context.push_literal_list(Command::LiteralPayload::kReference,ts,te); fret;};
+		((left_brace data_type (comma data_type)* right_brace) @/on_end_of_file)=> {context.push_literal_list(Command::LiteralPayload::kType,ts,te); fret;};
 
-		left_brace => {context.push_error("parse.unexpected_end_of_file");};
-		left_brace literal (comma literal)* literal => {context.push_error("parse.data_list.missing_comma");};
 		left_brace (name|null_name)+ (comma (name|null_name)+)* right_brace => { context.push_error("parse.list.illegal_reference");};
 		left_brace literal (comma literal)* right_brace => { context.push_error("semantic.literal.type_mismatch");};
+		left_brace literal (comma? literal)* right_brace => {context.push_error("parse.data_list.missing_comma");};
+
+		#Fallback path for illegal literals
+		left_brace (any-right_brace)*=> {context.push_error("parse.illegal_token"); fbreak;};
+
+		
+		
 	*|;
 	data_array := |*
 		left_brace => { context.push_array_element(); fhold; fcall literal_sequence;};
@@ -120,7 +126,7 @@ using namespace openddl::detail;
 				fcall structure_property_list;
 				};
 		right_brace => {
-			 context.end_structure(); if( top!=0) {fret;}
+			if( top!=0) {context.end_structure(); fret;}
 		};
 	*|;
 	

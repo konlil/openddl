@@ -87,7 +87,7 @@ TEST_CASE("Parsing Data Lists", "[parse]"){
 		}
 	}
 	GIVEN("Literal List missing comma"){
-		std::string input = "bool { false true } ";
+		std::string input = "bool { false true false } ";
 		std::vector<openddl::detail::Error> errors;
 		std::vector<openddl::detail::Token> tokens;
 		std::vector<openddl::detail::Command> commands;
