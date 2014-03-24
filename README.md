@@ -1,10 +1,10 @@
-OpenDDL Parser (0.2)
+OpenDDL Parser (0.3-WIP)
 =======
-This interim release addresses a number of defects in the lexer and parser components and introduces the semantic checker.
 
-Further improvements will be made at a later date to clean up the lexer and parser internals but not until the user API has been
-developed further.
+This release begins the start of implementing a higher level API upon the low level primitives.
 
-The library is quite useable for those willing to get their hands dirty in digging through library internals but is not recommended for most.
-
+With this, a more interesting demo is being developed for interested parties which demonstrates
+iterating through the tree structure, searching for specific elements within a file and such.
+It is also a great effort in utilising some variables on each command object which have not 
+been fully utilised/tested until now.
 
